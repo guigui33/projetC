@@ -1,0 +1,33 @@
+algo: mainClient
+Debut
+	connexionServeur(“adresse serveur”);
+	si connexionServeurOk alors 
+		faire	
+			msgConnexion<-MenuConnex(); //on recupère l'identifiant de connexions et le mode de passe dans une chaîne de 								caractères
+			émission(msgConnexion); // on envoie les informations au serveur	
+			reception(msg);// msg retour serveur
+			si msg="identif OK" alors /*l'utilisateur peut accèder au menu */      
+				Menu(); /* dans la fonction menu l'utilisateur interargira avec le serveur 
+			FinSI
+		TQ(quitter!=0 && msg!="fin de connexion");
+	Sinon afficherEcran("connexion serveur impossible");
+	Finsi
+FIN algo
+	
+Algo: mainServeur
+DebutAlgo:
+	
+	AttenteClient();
+	message = Reception(); //on reçoit le message 
+	switch(debut(message)){ // on test le premier mot de la chaine message 
+	case create: creationDeCompte(message) // on créé un compte client;
+	case connect: controleIDUtilisateur(message); // controle de l'id et mot de passe de l'utilisateur
+	case consulter: consulterProduit(message); // le client demande à consulter les produits du catalogue
+	case acheter: achatProduit(message); // le client propose une enchère pour un produit
+	case vendre: vendreProduit(message); // le client propose un mise en vente d'un objet	
+	case quitter: terminaisonClient();//le client demande à se déconnecter du serveur
+	case default: MsgError(message);// aucun mot clé trouvé, on envoit un message d'erreur
+	}	
+		
+FinAlgo
+
