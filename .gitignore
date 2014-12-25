@@ -1,7 +1,13 @@
 # Les ligne commençant par '#' sont des commentaires.
+
 #ignorer fichier temp ~
 *~
 #ignorer les fichiers: 
 Projet2014-2015.pdf
 ProjetInfo_Cantal_Massip.pdf
-
+#ignorer .depend
+*.depend
+#ignorer .o
+*.o
+#ignorer .cbp
+*.cbp
