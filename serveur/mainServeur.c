@@ -22,9 +22,9 @@ int main()
 
             if(message!=NULL)
             {
-                menu();
-                free(message);
-                message=NULL;
+             //   menu();
+                //free(message);
+               // message=NULL;
             }
 
            TerminaisonClient();
