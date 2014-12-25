@@ -17,10 +17,10 @@ int main()
 
     do
     {
-        menuConnex(msgConnexion);
-        Emission(msgConnexion);
-        Reception(msg);
-        menu();
+//        menuConnex(msgConnexion);
+       // Emission(msgConnexion);
+//        Reception(msg);
+//        menu();
     }
     while(!fin);
 
