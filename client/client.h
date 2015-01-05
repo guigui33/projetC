@@ -42,8 +42,44 @@ int EmissionBinaire(char *donnees, size_t taille);
 /* Ferme la connexion.
  */
 void Terminaison();
-/*
 
+/**
+\fn void menuConnex(char *msgConnexion)
+\brief fonction permettant d'afficher le menu, l'utilisateur fait sont choix
+\param char* une chaine de caractère permettant de retourner les paramêtres de connexion
+    la chaine peut avoir la valeur "quitter" ou l'identifiant suivit du mot de passe
+\return
 */
-void menuConnex(msgConnexion);
+void menuConnex(char *msgConnexion);
+
+/**
+\fn void authentification(char *msgConnexion)
+\brief fonction pemettant d'afficher le menu d'authentification, l'utilisateur entre son mot de passe et son identifiant
+\param char* une chaine de caratère permettant de sauvegarder l'identifiant et le mot de passe
+\return
+*/
+void authentification(char *msgConnexion);
+
+/**
+\fn void creationDeCompte()
+\brief fonction permettant d'afficher la creation de compte
+\param
+\return
+*/
+void creationDeCompte();
+
+/**
+\fn void viderBuffer()
+\brief vide le buffer
+*/
+void viderBuffer();
+
+/**
+\fn void supprCara(char *chaine)
+\brief fonction qui permet de remplacer le '\n' par '\0'
+        si l'utilisateur a entrée trop de caractère (le '\n' n'est pas trouvé) on vide le buffer
+\param char* un pointeur sur une chaine
+\return
+*/
+void supprCara(char *chaine);
 #endif
