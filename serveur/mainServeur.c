@@ -16,19 +16,22 @@ int main()
 
         AttenteClient();
 
-            message = Reception();
+        message = Reception();
 
-            printf("J'ai recu %s\n",message);
+        printf("J'ai recu %s\n",message);
 
-            if(message!=NULL)
-            {
-             //   menu();
-                //free(message);
-               // message=NULL;
+        if(message!=NULL)
+        {
+            if(!strncmp(message,"quitter",7)){
+                fini=1;
             }
-
-           TerminaisonClient();
-
+            //   menu();
+            //free(message);
+            // message=NULL;
+        }
+        if(fini){
+            TerminaisonClient();
+        }
     }
 
     return 0;
