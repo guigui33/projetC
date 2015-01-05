@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -289,5 +288,105 @@ void Terminaison()
 *********************************************************************************************
 */
 
+void menuConnex(char *msgConnexion)
+{
+    size_t fin=0;
+    char choix[2];
+    while(!fin)
+    {
+        printf("-------Menu-------\n");
+        printf("1)Authentification\n2)Création de compte\n0)quitter\n");
+        printf("choix: ");
 
+        if(fgets(choix,2,stdin)==NULL){
+            perror("probleme dans l'entrée choix\n");
+            exit(1); // on quitte le programme
+        }
+        supprCara(choix);
+            switch(choix[0])
+            {
+            case '1':
+                authentification(msgConnexion);
+                fin=1;
+                break;
+            case '2':
+                creationDeCompte();
+                break;
+            case '0':
+                strncpy(msgConnexion,"quitter\0",strlen(msgConnexion)+strlen("quitter\0"));
+                fin=1;
+                break;
+            default:
+                printf("erreur dans le choix, recommencez.\n");
+                msgConnexion[0]='\0';
+                break;
+            }
 
+    }
+
+    return;
+}
+
+void authentification(char *msgConnexion)
+{
+    char id[7];// contient l'identifiant de l'utilisateur
+    char motPasse[6];// contient le mot de passe de l'utilisateur
+    printf("*** menu connexion ***\n");
+    printf("id: ");
+    if(fgets(id,7,stdin)==NULL){
+        perror("erreur pour l'entrée identifiant\n");
+        exit(1); // on quitte le prog
+                }
+
+    supprCara(id);
+
+    printf("mot de passe: ");
+    if(fgets(motPasse,6,stdin)==NULL){
+        perror("erreur pour l'entrée mot de passe\n");
+        exit(1); // on quitte le prog
+    }
+
+    supprCara(motPasse);// suppr '\n'
+
+    strncat(msgConnexion,id,strlen(msgConnexion)+strlen(id));
+    strncat(msgConnexion,motPasse,strlen(msgConnexion)+strlen(motPasse));
+    printf("%s\n",msgConnexion);
+
+    return ;
+}
+
+void creationDeCompte()
+{
+    char choix[5];
+    printf("création de compte:\n");
+    printf("entrez votre identifiant:\n");
+    fgets(choix,5,stdin);
+    printf("%s\n",choix);
+    return;
+}
+
+void supprCara(char *chaine){
+    char *position=NULL; // util pour suppr le \n
+    position=strchr(chaine,'\n');
+
+    if(position!=NULL){
+        *position='\0';
+    }
+    else {
+        viderBuffer(); // \n n'est pas trouvé, l'utilisateur a tapé plus de 6 caractères on doit vider le buffer
+    }
+
+    return;
+}
+
+void viderBuffer()
+{
+    char c;
+    c=fgetc(stdin);
+    while(c!='\0' && c!=EOF && c!='\n')
+    {
+        c=fgetc(stdin);
+    }
+
+    return;
+}
