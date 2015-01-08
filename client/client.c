@@ -383,7 +383,7 @@ void viderBuffer()
 {
     char c;
     c=fgetc(stdin);
-    while(c!='\0' && c!=EOF && c!='\n')
+    while(c!=EOF && c!='\n')
     {
         c=fgetc(stdin);
     }
