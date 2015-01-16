@@ -8,11 +8,14 @@ int main()
 {
 
     char *message = NULL;
+    char *messageRetour=NULL;
+    int retour=0; //variable d'aide pour les retours de fonction
     Initialisation();
 
     while(1)
     {
-        int fini = 0;
+        int fini = 0;//boolean pour fin de session
+        int authentifOK=0;
 
         AttenteClient();
 
@@ -22,18 +25,44 @@ int main()
 
         if(message!=NULL)
         {
-            if(!strncmp(message,"quitter",7)){
+            if(!strncmp(message,"quitter",7))
+            {
                 fini=1;
             }
-            //   menu();
-            //free(message);
-            // message=NULL;
+
+            if(!strncmp(message,"Connex",6))
+            {
+                /*verification de l'id et du mot de passe de l'utilisateur*/
+                authentifOK=verificationAuthentification(message,strlen(message));
+                if(authentifOK)
+                {
+                    EmissionBinaire("connexionOK",strlen("connexionOK"));
+                }
+                else
+                {
+                    EmissionBinaire("connexionNon",strlen("connexionNon"));
+                }
+            }
+            else if(!strncmp(message,"Deco",4))
+            {
+                messageRetour="deconnexion";
+                EmissionBinaire(messageRetour,strlen(messageRetour));
+            }
+
+            else if(!strncmp(message,"create",6))
+            {
+                retour=verifCreationCompte(message,strlen(message));
+                messageRetour="ok"; //faire le retour erreur
+                EmissionBinaire(messageRetour,strlen(messageRetour));
+            }
+
+            free(message);
+            message=NULL;
         }
 
-        if(fini){
-            TerminaisonClient();
-        }
-    }
+        TerminaisonClient();
+
+    }//fin while(1)
 
     return 0;
 }
