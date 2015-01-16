@@ -302,6 +302,7 @@ void menuConnex(char *msgConnexion)
             perror("probleme dans l'entrée choix\n");
             exit(1); // on quitte le programme
         }
+
         supprCara(choix);
             switch(choix[0])
             {
@@ -329,11 +330,11 @@ void menuConnex(char *msgConnexion)
 
 void authentification(char *msgConnexion)
 {
-    char id[7];// contient l'identifiant de l'utilisateur
-    char motPasse[6];// contient le mot de passe de l'utilisateur
+    char id[6];// contient l'identifiant de l'utilisateur
+    char motPasse[16];// contient le mot de passe de l'utilisateur
     printf("*** menu connexion ***\n");
     printf("id: ");
-    if(fgets(id,7,stdin)==NULL){
+    if(fgets(id,6,stdin)==NULL){
         perror("erreur pour l'entrée identifiant\n");
         exit(1); // on quitte le prog
                 }
@@ -341,7 +342,7 @@ void authentification(char *msgConnexion)
     supprCara(id);
 
     printf("mot de passe: ");
-    if(fgets(motPasse,6,stdin)==NULL){
+    if(fgets(motPasse,16,stdin)==NULL){
         perror("erreur pour l'entrée mot de passe\n");
         exit(1); // on quitte le prog
     }
