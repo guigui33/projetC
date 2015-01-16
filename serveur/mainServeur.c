@@ -29,6 +29,7 @@ int main()
             //free(message);
             // message=NULL;
         }
+
         if(fini){
             TerminaisonClient();
         }
