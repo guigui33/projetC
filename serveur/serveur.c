@@ -343,4 +343,210 @@ void Terminaison()
 ********************************************************************************************************************
 */
 
+/*on recherche l'identifiant et le mot de passe dans le fichier*/
+int chercherFichierIdMdp(char idChr[6],char mdpChr[16]){
 
+    char id[6]; //recuperation id fichier
+    char mdp[16];//recuperation mdp fichier
+    char c;
+    int i=0; //var de boucle
+    int trouve=0; //boolean de test de boucle
+    int mdpOK=0;//boolean
+    FILE *user=NULL;
+    user=fopen("user.txt","rb");
+    if(user==NULL)
+    {
+        perror("erreur d'ouverture de fichier, le fichier \"user.txt\" n'existe pas.\n");
+        return -1; //on returne une erreur
+    }
+
+    c=fgetc(user); // on lit le premier caractère
+    /*on lit jusqu'à qu'on trouve l'identifiant recherché ou la fin du fichier a été atteint*/
+    while(!trouve && c!=EOF)
+    {
+        while(c!='$' && c!=EOF)
+        {
+            c=fgetc(user); // on lit jusqu'à qu'on lise $ ou eof
+        }
+
+        if(c!=EOF)
+        {
+            fgets(id,6,user); //on recupère l'id, les 5 premiers caractères apres le $
+            if(!strcmp(id,idChr)) //on compare le id avec l'id recherché
+            {
+                //si egaux
+                c=fgetc(user); // on lit le #
+                c=fgetc(user); // on lit le caractère suivant
+                /*on lit les caractères jusqu'à qu'on tombe sur le # (fin du mot de passe), ou bien EOF ou i==15*/
+                while(c!='#' && c!= EOF && i<15)
+                {
+                    mdp[i]=c;
+                    c=fgetc(user);
+                    i++;
+                }
+                mdp[i]='\0'; //on met le \0 a la fin de la chaine
+                trouve=1; // on actualise la varirable pour quitter la boucle
+                if(!strcmp(mdp,mdpChr))
+                {
+                    mdpOK=1; // le mot de passe est correct
+                    }
+                else mdpOK=0; // le mot de passe est incorrect
+            }
+            else c=fgetc(user);
+        }
+    }
+    return mdpOK; // 1 si mdp et identifiant correct, 0 sinon
+}
+
+/*verifie l'identifiant du client et son mot de passe*/
+int verificationAuthentification(char *message,int tailleMsg)
+{
+    FILE *users=NULL;
+    int i=0; //variable de boucle
+    int j=0; //boucle
+    char id[6]; // recuperation identifiant dans le message
+    char mdp[16];// recuperation mot de passe dans le message
+    int verifOK=0;
+
+    users=fopen("user.txt","rb"); // on ouvre le fichier en lecture
+    if(users==NULL){
+        perror("le fichier user.txt n'existe pas\n");
+        return -1;
+    }
+
+    while(i<tailleMsg && message[i]!=' ') i++;
+    i++;
+    j=0;
+    while(i<tailleMsg && message[i]!='#'){
+        id[j]=message[i];
+        j++;
+        i++;
+    }
+    j=0;
+    while(i<tailleMsg && message[i]!='\n'){
+        mdp[j]=message[i];
+        j++;
+        i++;
+    }
+
+    verifOK=chercherFichierIdMdp(id,mdp);
+    fclose(users);
+
+    return verifOK;
+}
+
+
+int verifCreationCompte(char *message,int longMsg)
+{
+    FILE *user=NULL;//fichier d'utilisateur
+    int i=0; //indice message
+    int j=0; //indice parcourt de chaine
+
+    char nom[50];
+    char prenom[50];
+    char date[7];
+    char NTel[10];
+    char adMail[100];
+    char adresse[100];
+    char ville[100];
+    char codePostal[5];
+    char mdp[16];
+    char id[6];
+
+    /*on cherche l'espace qui delimite le debut des informations du client*/
+    while(i<longMsg && message[i]!=' ') i++;
+    i++; //on passe le ' '
+
+    while(i<longMsg && message[i]!='#')
+    {
+        nom[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+
+    while(i<longMsg && message[i]!='#')
+    {
+        prenom[j]=message[i];
+        i++;
+        j++;
+    }
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        date[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        NTel[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        adMail[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        adresse[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        ville[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='#')
+    {
+        codePostal[j]=message[i];
+        i++;
+        j++;
+    }
+
+    j=0;
+    while(i<longMsg && message[i]!='\n')
+    {
+        mdp[j]=message[i];
+        i++;
+        j++;
+    }
+    /*faire fonction creation id*/
+    id[0]=nom[0];
+    id[1]=nom[1];
+    id[2]=prenom[0];
+    id[3]='0';
+    id[4]='1';
+    id[5]='\0';
+
+    user=fopen("user.txt","ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
+    if(user==NULL){
+        perror("erreur d'ouverture de fichier");
+        return -1; //on returne une erreur
+    }
+
+    /*$identifiant utilisateur#Nom#Prenom#date de naissance#N° de téléphone#adresse
+mail#N° de rue#nom rue#ville#code postal#mot de passe#nombre d’objet acheté#nombre
+d’objet vendu */
+    fprintf(user,"$%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#0#0",id,mdp,nom,prenom,date,NTel,adMail,adresse,ville,codePostal);
+
+    fclose(user);
+
+    return 1;
+}
