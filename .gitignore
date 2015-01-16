@@ -4,7 +4,7 @@
 *~
 #ignorer les fichiers: 
 Projet2014-2015.pdf
-ProjetInfo_Cantal_Massip.pdf
+
 #ignorer .depend
 *.depend
 #ignorer .o
