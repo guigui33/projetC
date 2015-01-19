@@ -37,4 +37,15 @@ int chercherFichierIdMdp(char idChr[6],char mdpChr[16]);
 */
 int creationId(char idChr[6]);
 
+/**
+\fn int extraireIdClient(char *message,int tailleMsg,char *id,int tailleId)
+\brief extraire l'id de l'utilisateur du message
+\param [in][out]message tableau de char
+\param tailleMsg taille du message
+\param [out]id tableau de char de taille 6
+\param tailleId la taille du tableau id
+\return 1 si id a été créé, -1 si erreur d'ouverture fichier
+*/
+int extraireIdClient(char *message,int tailleMsg,char *id,int tailleId);
+
 #endif // CLIENT_H_INCLUDED

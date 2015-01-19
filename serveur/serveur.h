@@ -51,5 +51,11 @@ void TerminaisonClient();
 /* Arrete le serveur.
  */
 void Terminaison();
+/**
+\fn int extraireTypeRequete(char *message,int tailleMsg,char *typeRequete,int tailleReq)
+\brief extrait le type de requète du message
+\param message
+*/
+int extraireTypeRequete(char *message,int tailleMsg,char *typeRequete,int tailleReq);
 
 #endif

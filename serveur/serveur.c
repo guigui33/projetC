@@ -338,3 +338,9 @@ void Terminaison()
     close(socketEcoute);
 }
 
+/*
+extraire le mot clé du message
+*/
+int extraireTypeRequete(char *message,int tailleMsg,char *typeRequete,int tailleReq){
+return 1;
+}

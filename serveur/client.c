@@ -157,7 +157,7 @@ int verificationAuthentification(char *message,int tailleMsg)
     return verifOK;
 }
 
-/*a faire controle d'erreur !!!!!!*/
+/*fonction a refaire, a faire controle d'erreur !!!!!!*/
 int verifCreationCompte(char *message,int longMsg)
 {
     FILE *user=NULL;//fichier d'utilisateur
@@ -277,4 +277,8 @@ int verifCreationCompte(char *message,int longMsg)
     fclose(user);
 
     return 1;
+}
+
+int extraireIdClient(char *message,int tailleMsg,char *id,int tailleId){
+return 1;
 }
