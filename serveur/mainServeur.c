@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "serveur.h"
+#include "client.h"
+#include "objet.h"
 #include <string.h>
 #include <time.h>
 

@@ -142,6 +142,7 @@ int verificationAuthentification(char *message,int tailleMsg)
         j++;
         i++;
     }
+    i++;
     j=0;
     while(i<tailleMsg && message[i]!='\n')
     {
@@ -156,7 +157,7 @@ int verificationAuthentification(char *message,int tailleMsg)
     return verifOK;
 }
 
-
+/*a faire controle d'erreur !!!!!!*/
 int verifCreationCompte(char *message,int longMsg)
 {
     FILE *user=NULL;//fichier d'utilisateur
@@ -193,6 +194,7 @@ int verifCreationCompte(char *message,int longMsg)
     }
 
     j=0;
+    i++;
 
     while(i<longMsg && message[i]!='#')
     {
@@ -200,7 +202,7 @@ int verifCreationCompte(char *message,int longMsg)
         i++;
         j++;
     }
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         date[j]=message[i];
@@ -208,7 +210,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         NTel[j]=message[i];
@@ -216,7 +218,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         adMail[j]=message[i];
@@ -224,7 +226,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         adresse[j]=message[i];
@@ -232,7 +234,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         ville[j]=message[i];
@@ -240,7 +242,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='#')
     {
         codePostal[j]=message[i];
@@ -248,7 +250,7 @@ int verifCreationCompte(char *message,int longMsg)
         j++;
     }
 
-    j=0;
+    j=0;i++;
     while(i<longMsg && message[i]!='\n')
     {
         mdp[j]=message[i];
