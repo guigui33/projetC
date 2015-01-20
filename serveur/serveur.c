@@ -341,6 +341,6 @@ void Terminaison()
 /*
 extraire le mot clé du message
 */
-int extraireTypeRequete(char *message,int tailleMsg,char *typeRequete,int tailleReq){
+int extraireTypeRequete(char *message,int tailleMsg,char *donnee,char *typeRequete){
 return 1;
 }
