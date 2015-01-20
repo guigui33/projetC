@@ -19,3 +19,17 @@ int enregistrementObjet(char *message,int longMsg){
 
 return 1;
 }
+
+
+int acheterObjet(char *msg,int tailleMsg,char *id){
+return 1;
+}
+
+
+int consulter(char *msg,int tailleMsg,char *id){
+return 1;
+}
+
+int vendre(char *msg,int tailleMsg,char *id){
+return 1;
+}
