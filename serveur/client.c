@@ -158,22 +158,12 @@ int verificationAuthentification(char *message,int tailleMsg)
 }
 
 /*fonction a refaire, a faire controle d'erreur !!!!!!*/
-int verifCreationCompte(char *message,int longMsg)
+int creationCompte(char *message,int longMsg)
 {
-    FILE *user=NULL;//fichier d'utilisateur
+    /*FILE *user=NULL;//fichier d'utilisateur
     int i=0; //indice message
     int j=0; //indice parcourt de chaine
 
-    char nom[50];
-    char prenom[50];
-    char date[7];
-    char NTel[10];
-    char adMail[100];
-    char adresse[100];
-    char ville[100];
-    char codePostal[5];
-    char mdp[16];
-    char id[6];
 
     user=fopen("user.txt","ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
     if(user==NULL)
@@ -182,83 +172,8 @@ int verifCreationCompte(char *message,int longMsg)
         return -1; //on returne une erreur
     }
 
-    /*on cherche l'espace qui delimite le debut des informations du client*/
-    while(i<longMsg && message[i]!=' ') i++;
-    i++; //on passe le ' '
-
-    while(i<longMsg && message[i]!='#')
-    {
-        nom[j]=message[i];
-        i++;
-        j++;
     }
 
-    j=0;
-    i++;
-
-    while(i<longMsg && message[i]!='#')
-    {
-        prenom[j]=message[i];
-        i++;
-        j++;
-    }
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        date[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        NTel[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        adMail[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        adresse[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        ville[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='#')
-    {
-        codePostal[j]=message[i];
-        i++;
-        j++;
-    }
-
-    j=0;i++;
-    while(i<longMsg && message[i]!='\n')
-    {
-        mdp[j]=message[i];
-        i++;
-        j++;
-    }
-
-    /*on actualise les 3 premières lettres de l'id*/
     id[0]=nom[0];
     id[1]=nom[1];
     id[2]=prenom[0];
@@ -268,17 +183,17 @@ int verifCreationCompte(char *message,int longMsg)
         perror("erreur d'ouverture fichier user.txt\n");
         return -1; //on retourne une erreur d'ouverture
     }
-
+*/
     /*$identifiant utilisateur#Nom#Prenom#date de naissance#N° de téléphone#adresse
     mail#N° de rue#nom rue#ville#code postal#mot de passe#nombre d’objet acheté#nombre
     d’objet vendu */
-    fprintf(user,"$%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#0#0",id,mdp,nom,prenom,date,NTel,adMail,adresse,ville,codePostal);
+  /*  fprintf(user,"$%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#0#0",id,mdp,nom,prenom,date,NTel,adMail,adresse,ville,codePostal);
 
     fclose(user);
-
+*/
     return 1;
 }
 
-int extraireIdClient(char *message,int tailleMsg,char *id,int tailleId){
+int extraireIdClient(char *message,int tailleMsg,char *id){
 return 1;
 }
