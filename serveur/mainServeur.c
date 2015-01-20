@@ -10,16 +10,18 @@ int main()
 {
 
     char *message = NULL;
-    char *messageRetour=NULL;
-    int retour=0; //variable d'aide pour les retours de fonction
+
     Initialisation();
 
     while(1)
     {
-        int fini = 0;//boolean pour fin de session
         int authentifOK=0;
-        char typeRequete[10];
-        char id[6];
+        char typeRequete[10];//variable pour connaitre le type de requète
+        char id[6];//recupère l'id de l'utilisateur
+        int retour=0; //variable d'aide pour les retours de fonction
+        char *messageRetour=NULL; //message retour
+        char *donnee=NULL; //pointeur sur le message où commence les donnees
+
         AttenteClient();
 
         message = Reception();
@@ -29,51 +31,78 @@ int main()
         if(message!=NULL)
         {
             /*on extrait le type de requète*/
-            extraireTypeRequete(message,strlen(message),typeRequete,10);
+            extraireTypeRequete(message,strlen(message),donnee,typeRequete);
             if(!strncmp(message,"create",6))
             {
-                retour=verifCreationCompte(message,strlen(message));
-                messageRetour="ok"; //faire le retour erreur
-                EmissionBinaire(messageRetour,strlen(messageRetour));
+                retour=creationCompte(donnee,strlen(donnee));
+                if(retour==1)
+                {
+                    messageRetour="ok"; //faire le retour erreur
+                }
+                else if(retour==0)
+                {
+                    messageRetour="nonOk";
+                }
+                else
+                {
+                    messageRetour="prblmServeur";
+                }
+
+            }
+            else if(!strncmp(typeRequete,"Connex",6))
+            {
+                /*verification de l'id et du mot de passe de l'utilisateur*/
+                authentifOK=verificationAuthentification(donnee,strlen(donnee));
+                if(authentifOK==1)
+                {
+                    messageRetour="connexOk";
+                }
+                else if(authentifOK==0)
+                {
+                    messageRetour="connexNon";
+                }
+                else
+                {
+                    messageRetour="prblm serveur";
+                }
             }
             else
             {
-                extraireIdClient(message,strlen(message),id,7);
-                if(!strncmp(message,"Deco",4))
+                retour=extraireIdClient(donnee,strlen(donnee),id);
+                if(retour==0)
                 {
-                    messageRetour="deconnexion";
-                    EmissionBinaire(messageRetour,strlen(messageRetour));
+                    messageRetour="prblm msg";
                 }
-
-                else if(!strncmp(typeRequete,"Connex",6))
+                else if(retour==-1)
                 {
-                    /*verification de l'id et du mot de passe de l'utilisateur*/
-                    authentifOK=verificationAuthentification(message,strlen(message));
-                    if(authentifOK)
+                    messageRetour="prblm Serveur";
+                }
+                else
+                {
+                    if(!strncmp(message,"Deco",4))
                     {
-                        EmissionBinaire("connexionOK",strlen("connexionOK"));
+                        messageRetour="deconnexion";
+                    }
+
+                    else if (!strncmp(typeRequete,"acheter",7))
+                    {
+                        acheterObjet(donnee,strlen(donnee),id);
+                    }
+                    else if(!strncmp(typeRequete,"consulter",9))
+                    {
+                        consulter(donnee,strlen(donnee),id);
+                    }
+                    else if(!strncmp(typeRequete,"vendre",6))
+                    {
+                        vendre(donnee,strlen(donnee),id);
                     }
                     else
                     {
-                        EmissionBinaire("connexionNon",strlen("connexionNon"));
+                        messageRetour="type message inconnu"; //utilité?????????
                     }
                 }
-                else if (!strncmp(typeRequete,"acheter",7))
-                {
-                    //faireonction f
-                }
-                else if(!strncmp(typeRequete,"consulter",9)){
-                    //fonction consulter
-                }
-                else if(!strncmp(typeRequete,"vendre",6)){
-                    //fonction mettre un objet en vente
-                }
-                else {
-                    //requète inconnue
-                }
-
             }
-
+            EmissionBinaire(messageRetour,strlen(messageRetour));
             free(message);
             message=NULL;
         }
