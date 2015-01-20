@@ -21,4 +21,16 @@ int creerIdObjet(char *msg,int longMsg,char *idObjet,int taille);
 */
 int enregistrementObjet(char *message,int longMsg);
 
+/**
+
+*/
+int acheterObjet(char *msg,int tailleMsg,char *id);
+/**
+*/
+int consulter(char *msg,int tailleMsg,char *id);
+
+/**
+*/
+int vendre(char *msg,int tailleMsg,char *id);
+
 #endif // OBJET_H_INCLUDED
