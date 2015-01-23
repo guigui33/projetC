@@ -53,14 +53,14 @@ void TerminaisonClient();
 void Terminaison();
 
 /**
-\fn int extraireTypeRequete(char *message,int tailleMsg,char *donnee,char *typeRequete)
-\brief extrait le type de requète du message
+\fn int extraireTypeRequete(char *message,int tailleMsg,char **donnee,char *typeRequete)
+\brief extrait le type de requète du message, met à jour le pointeur sur le message
 \param[in] message tableau de char contenant le message de l'utilisateur
 \param[in] tailleMsg taille du message
 \param[out] donnee pointeur sur le debut des donnees utilisateur
-\param[out] typeRequete tableau de char contenant le type de requète (est defini <10 char)
-\return un entier, 1 si tout c'est bien passé, 0 si problème message, -1 sinon
+\param[out] typeRequete tableau de char contenant le type de requète (taille max 10)
+\return un entier 1
 */
-int extraireTypeRequete(char *message,int tailleMsg,char *donnee,char *typeRequete);
+int extraireTypeRequete(char *message,int tailleMsg,char **donnee,char *typeRequete);
 
 #endif

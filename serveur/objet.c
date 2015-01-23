@@ -15,7 +15,7 @@ base#catégorie#description#URL d'une image#quantité#ville où se situe l’obj
 /*$identifiant Produit#Identifiant utilisateur#Nom objet#date de mise en vente#prix de
 base#catégorie#description#URL d'une image#quantité#ville de l’utilisateur */
 
-int enregistrementObjet(char *message,int longMsg){
+int enregistrementObjet(char *message,int longMsg,char *idUti){
 
 return 1;
 }

@@ -341,6 +341,20 @@ void Terminaison()
 /*
 extraire le mot clé du message
 */
-int extraireTypeRequete(char *message,int tailleMsg,char *donnee,char *typeRequete){
+//peut contenir des erreurs d'adresse
+int extraireTypeRequete(char *message,int tailleMsg,char **donnee,char *typeRequete){
+
+int i=0; //variable de boucle
+int tailleRequete=10;
+
+/*on cherche le premier # dans le message */
+while(i<tailleMsg && i<tailleRequete && message[i]!='#'){
+    typeRequete[i]=message[i]; //initialise la variable typeRequete
+    i++;
+}
+i++;//on passe le #
+
+*donnee=&message[i]; //met a jour le pointeur pour se servir que du reste du message dans les autres fonctions
+
 return 1;
 }

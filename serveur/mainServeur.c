@@ -15,12 +15,12 @@ int main()
 
     while(1)
     {
-        int authentifOK=0;
         char typeRequete[10];//variable pour connaitre le type de requète
-        char id[6];//recupère l'id de l'utilisateur
+        char idUti[6];//recupère l'id de l'utilisateur
         int retour=0; //variable d'aide pour les retours de fonction
         char *messageRetour=NULL; //message retour
         char *donnee=NULL; //pointeur sur le message où commence les donnees
+
 
         AttenteClient();
 
@@ -31,7 +31,7 @@ int main()
         if(message!=NULL)
         {
             /*on extrait le type de requète*/
-            extraireTypeRequete(message,strlen(message),donnee,typeRequete);
+            extraireTypeRequete(message,strlen(message),&donnee,typeRequete);
             if(!strncmp(message,"create",6))
             {
                 retour=creationCompte(donnee,strlen(donnee));
@@ -52,12 +52,12 @@ int main()
             else if(!strncmp(typeRequete,"Connex",6))
             {
                 /*verification de l'id et du mot de passe de l'utilisateur*/
-                authentifOK=verificationAuthentification(donnee,strlen(donnee));
-                if(authentifOK==1)
+                retour=verificationAuthentification(donnee,strlen(donnee));
+                if(retour==1)
                 {
                     messageRetour="connexOk";
                 }
-                else if(authentifOK==0)
+                else if(retour==0)
                 {
                     messageRetour="connexNon";
                 }
@@ -68,7 +68,9 @@ int main()
             }
             else
             {
-                retour=extraireIdClient(donnee,strlen(donnee),id);
+                /*on extrait l'id de la chaine, et on verifie que l'id existe*/
+                retour=extraireIdClient(&donnee,strlen(donnee),idUti);
+
                 if(retour==0)
                 {
                     messageRetour="prblm msg";
@@ -79,22 +81,22 @@ int main()
                 }
                 else
                 {
-                    if(!strncmp(message,"Deco",4))
+                    if(!strncmp(typeRequete,"Deco",4))
                     {
                         messageRetour="deconnexion";
                     }
 
                     else if (!strncmp(typeRequete,"acheter",7))
                     {
-                        acheterObjet(donnee,strlen(donnee),id);
+                        acheterObjet(donnee,strlen(donnee),idUti);
                     }
                     else if(!strncmp(typeRequete,"consulter",9))
                     {
-                        consulter(donnee,strlen(donnee),id);
+                        consulter(donnee,strlen(donnee),idUti);
                     }
                     else if(!strncmp(typeRequete,"vendre",6))
                     {
-                        vendre(donnee,strlen(donnee),id);
+                        vendre(donnee,strlen(donnee),idUti);
                     }
                     else
                     {

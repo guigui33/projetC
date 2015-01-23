@@ -20,31 +20,33 @@ int verificationAuthentification(char *message,int tailleMsg);
 int creationCompte(char *message,int longMsg);
 
 /**
-\fn int chercherFichierIdMdp(char idChr[6],char mdpChr[16])
+\fn int chercherFichierIdMdp(char *idChr,char *mdpChr)
 \brief cherche un identifiant et son mot de passe dans le fichier user.txt
-\param char idChr[6] l'identifiant à rechercher
-\param char mdpChr[16] le mot de passe à rechercher
+\param[in] idChr l'identifiant à rechercher
+\param[in] *mdpChr le mot de passe à rechercher
 \return 1 si l'identifiant et le mode de passe sont corrects, 0 si l'identifiant ou le mot de passe est incorrect, -1 si erreur fichier
 */
-int chercherFichierIdMdp(char idChr[6],char mdpChr[16]);
+int chercherFichierIdMdp(char *idChr,char *mdpChr);
 
 
 /**
-\fn int creationId(char id[6])
+\fn int creationId(char *message,int taille,char *id)
 \brief creer l'identifiant d'un nouveau utilisateur
-\param char id[6] tableau de char de taille 6 contenant les 3 premières lettres de l'id
-\return 1 si id a été créé, -1 si erreur d'ouverture fichier
+\param[in] message tableau de char contenant les informations de l'utilisateur
+\param[in] taille la taille du message
+\param[out] char idUti[6] tableau de char de taille 6
+\return 1 si id a été créé, -1 si erreur d'ouverture fichier, 0 sinon
 */
-int creationId(char idChr[6]);
+int creationId(char *message,int taille,char *idUti);
 
 /**
 \fn int extraireIdClient(char *message,int tailleMsg,char *id)
-\brief extraire l'id de l'utilisateur du message
+\brief extraire l'id de l'utilisateur du message, on verifie que l'id existe, le "message" pointe à la fin de la fonction sur ce qui precede l'id.
 \param[in][out] message tableau de char contenant l'id de l'utilisateur + les données du message
 \param[in] tailleMsg taille du message
 \param[out] id tableau de char de taille 6
-\return 1 si id a été extrait, -1 si erreur d'ouverture fichier, 0 sinon
+\return 1 si id a été extrait et qu'il existe, -1 si erreur d'ouverture fichier, 0 identifiant n'existe pas.
 */
-int extraireIdClient(char *message,int tailleMsg,char *id);
+int extraireIdClient(char **message,int tailleMsg,char *id);
 
 #endif // CLIENT_H_INCLUDED

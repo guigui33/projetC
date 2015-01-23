@@ -5,20 +5,19 @@
 #include "client.h"
 
 /*on recherche l'identifiant et le mot de passe dans le fichier*/
-int chercherFichierIdMdp(char idChr[6],char mdpChr[16])
+int chercherFichierIdMdp(char *idChr,char *mdpChr)
 {
-
     char id[6]; //recuperation id fichier
     char mdp[16];//recuperation mdp fichier
     char c;
     int i=0; //var de boucle
     int trouve=0; //boolean de test de boucle
-    int mdpOK=0;//boolean
+    int mdpOK=0;//valeur de retour
     FILE *user=NULL;
-    user=fopen("user.txt","rb");
+    user=fopen("fichiers/user.txt","rb");
     if(user==NULL)
     {
-        perror("erreur d'ouverture de fichier, le fichier \"user.txt\" n'existe pas.\n");
+        perror("erreur d'ouverture de fichier, le fichier \"fichiers/user.txt\" n'existe pas.\n");
         return -1; //on returne une erreur
     }
 
@@ -57,20 +56,34 @@ int chercherFichierIdMdp(char idChr[6],char mdpChr[16])
             else c=fgetc(user);
         }
     }
+
     return mdpOK; // 1 si mdp et identifiant correct, 0 sinon
 }
 
-int creationId(char idChr[6])
+/*manque le controle d'erreur si les nom et prenom long pas respectée*/
+int creationId(char *message,int taille,char *idUti)
 {
+
     FILE *user=NULL; //fichier information client
-    char id[6];//variable temp pour recupèrer id dans le fichier
+    char id[6];//variable temporaire pour lire les identifiants du fichier
     int nbrId=0; //sauvegarde la variable finale
     int tmpNbrId=0;//variable temp pour récuperer numero id dans le fichier
     char c;
+    int i=0;
 
+    /*on initialise les 3 premiers caractères de l'identifiant*/
+    while(i<taille && message[i]!='#') i++; //on passe le mot de passe
+    i++;
+    idUti[0]=message[i];
+    i++;
+    idUti[1]=message[i];
+    while(i<taille && message[i]!='#') i++;
+    i++;
+    idUti[2]=message[i];
+    idUti[3]='\0';
     id[0]='\0';
 
-    user=fopen("user.txt","rb"); //ouverture fichier en ajout, si fichier inexistant il sera créé
+    user=fopen("fichiers/user.txt","rb"); //ouverture fichier en lecture
     if(user==NULL)
     {
         perror("erreur d'ouverture de fichier");
@@ -89,7 +102,7 @@ int creationId(char idChr[6])
         if(c!=EOF)
         {
             fgets(id,4,user); //on recupère l'id, les 3 premiers caractères apres le $
-            if(!strcmp(id,idChr)) //on compare id avec id recherché
+            if(!strcmp(id,idUti)) //on compare id avec id recherché
             {
                 fscanf(user,"%d",&tmpNbrId); //on recupère le numero de l'id
 
@@ -106,10 +119,10 @@ int creationId(char idChr[6])
     if(nbrId<10)
     {
         /*si le numero de l'id est à 1 chiffre on met 1 zero devant pour respecter le format de l'id*/
-        sprintf(idChr,"%s%d%d",idChr,0,nbrId);
+        sprintf(idUti,"%s%d%d",idUti,0,nbrId);
     }
     else
-        sprintf(idChr,"%s%d",idChr,nbrId);
+        sprintf(idUti,"%s%d",idUti,nbrId);
 
     fclose(user);
 
@@ -126,32 +139,34 @@ int verificationAuthentification(char *message,int tailleMsg)
     char mdp[16];// recuperation mot de passe dans le message
     int verifOK=0;
 
-    users=fopen("user.txt","rb"); // on ouvre le fichier en lecture
+    users=fopen("fichiers/user.txt","rb"); // on ouvre le fichier en lecture
     if(users==NULL)
     {
-        perror("le fichier user.txt n'existe pas\n");
+        perror("le fichier fichiers/user.txt n'existe pas\n");
         return -1;
     }
 
-    while(i<tailleMsg && message[i]!=' ') i++;
-    i++;
     j=0;
-    while(i<tailleMsg && message[i]!='#')
+    while(i<tailleMsg && j<6 && message[i]!='#')
     {
         id[j]=message[i];
         j++;
         i++;
     }
     i++;
+    id[5]='\0';
+
     j=0;
-    while(i<tailleMsg && message[i]!='\n')
+    while(i<tailleMsg && j<15 && message[i]!='\n')
     {
         mdp[j]=message[i];
         j++;
         i++;
     }
+    mdp[i]='\0';
 
     verifOK=chercherFichierIdMdp(id,mdp);
+
     fclose(users);
 
     return verifOK;
@@ -160,40 +175,101 @@ int verificationAuthentification(char *message,int tailleMsg)
 /*fonction a refaire, a faire controle d'erreur !!!!!!*/
 int creationCompte(char *message,int longMsg)
 {
-    /*FILE *user=NULL;//fichier d'utilisateur
+    FILE *user=NULL;//fichier d'utilisateur
+    char id[6];
+    int retour=0; //variable de retour erreur fonction
+    int cpt=0; //compteur de #
     int i=0; //indice message
-    int j=0; //indice parcourt de chaine
 
-
-    user=fopen("user.txt","ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
+    user=fopen("fichiers/user.txt","ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
     if(user==NULL)
     {
         perror("erreur d'ouverture de fichier");
         return -1; //on returne une erreur
     }
-
+    /*verification du nombre de separateur*/
+    while(i<longMsg)
+    {
+        if(message[i]=='#')
+        {
+            cpt++;
+        }
+        i++;
     }
 
-    id[0]=nom[0];
-    id[1]=nom[1];
-    id[2]=prenom[0];
-
-    if(creationId(id)==-1)
+    if(cpt!=8)
     {
-        perror("erreur d'ouverture fichier user.txt\n");
+        printf("le format du message non respecté\n");
+        fclose(user);
+        return 0;
+    }
+
+    retour=creationId(message,longMsg,id);
+
+    if(retour==-1)
+    {
+        perror("erreur d'ouverture fichier fichiers/user.txt\n");
+        fclose(user);
         return -1; //on retourne une erreur d'ouverture
     }
-*/
-    /*$identifiant utilisateur#Nom#Prenom#date de naissance#N° de téléphone#adresse
-    mail#N° de rue#nom rue#ville#code postal#mot de passe#nombre d’objet acheté#nombre
-    d’objet vendu */
-  /*  fprintf(user,"$%s#%s#%s#%s#%s#%s#%s#%s#%s#%s#0#0",id,mdp,nom,prenom,date,NTel,adMail,adresse,ville,codePostal);
+    else if(retour==0)
+    {
+        printf("problème lors de la creation de l'id utilisateur\n");
+        fclose(user);
+        return 0;
+    }
+
+    fprintf(user,"$%s#%s#0#0",id,message);
 
     fclose(user);
-*/
+
     return 1;
 }
 
-int extraireIdClient(char *message,int tailleMsg,char *id){
-return 1;
+/*on extrait l'id de la chaine, et on verifie que l'id existe*/
+//attention peu etre bug
+int extraireIdClient(char **message,int tailleMsg,char *id)
+{
+    FILE *user=NULL;
+    int i=0;
+    char idTmp[6]; //variable temporaire
+    char c;
+    int termine=0;
+
+    while(i<tailleMsg && i<5 && (*message)[i]!='#')
+    {
+        id[i]=(*message)[i];
+        i++;
+    }
+    i++;// on passe le '#'
+    id[5]='\0';
+    *message=&(*message)[i];
+
+    user=fopen("fichiers/user.txt","rb");
+    if(user==NULL)
+    {
+        printf("erreur d'ouverture de fichier \"fichiers/user.txt\" en mode lecture\n");
+        return -1;
+    }
+
+    c=fgetc(user);
+    while(c!=EOF && !termine)
+    {
+
+        while(c!=EOF && c!='$')
+        {
+            c=fgetc(user);
+        }
+
+        fgets(idTmp,6,user);
+        if(!strncmp(idTmp,id,6))
+        {
+            termine=1;
+        }
+        else c=fgetc(user);
+    }
+
+    fclose(user);
+
+    return termine;
 }

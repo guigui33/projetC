@@ -13,13 +13,14 @@
 int creerIdObjet(char *msg,int longMsg,char *idObjet,int taille);
 
 /**
-\fn int enregistrementObjet(char *message,int longMsg)
+\fn int enregistrementObjet(char *message,int longMsg,char *idUti)
 \param message un pointeur de char qui contient les informations sur l'objet mise en vente
 \param longMsg longueur du message
+\param idUti l'identifiant de l'utilisateur sur 5 caractères
 \brief fonction qui verifie le message de mise en vente et enregistre les informations de l'objet dans le fichier "objet_en_vente.txt"
 \return 1 si tout c'est bien passé, -1 si erreur fichier, 0 sinon
 */
-int enregistrementObjet(char *message,int longMsg);
+int enregistrementObjet(char *message,int longMsg,char *idUti);
 
 /**
 

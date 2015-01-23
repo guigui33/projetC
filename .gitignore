@@ -5,9 +5,16 @@
 #ignorer les fichiers: 
 Projet2014-2015.pdf
 test
+timer
+fichiers
 #ignorer .depend
 *.depend
 #ignorer .o
 *.o
 #ignorer .cbp
 *.cbp
+#ignorer .layout
+*.layout
+#ignorer /bin
+client/bin/
+serveur/bin/
