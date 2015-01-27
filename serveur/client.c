@@ -15,6 +15,7 @@ int chercherFichierIdMdp(char *idChr,char *mdpChr)
     int mdpOK=0;//valeur de retour
     FILE *user=NULL;
     user=fopen("fichiers/user.txt","rb");
+
     if(user==NULL)
     {
         perror("erreur d'ouverture de fichier, le fichier \"fichiers/user.txt\" n'existe pas.\n");
@@ -74,12 +75,12 @@ int creationId(char *message,int taille,char *idUti)
     /*on initialise les 3 premiers caractères de l'identifiant*/
     while(i<taille && message[i]!='#') i++; //on passe le mot de passe
     i++;
-    idUti[0]=message[i];
-    i++;
-    idUti[1]=message[i];
-    while(i<taille && message[i]!='#') i++;
-    i++;
-    idUti[2]=message[i];
+    while(i<taille && i<3 && message[i]!='#')
+    {
+        idUti[i]=message[i];
+        i++;
+    }
+
     idUti[3]='\0';
     id[0]='\0';
 
@@ -147,7 +148,7 @@ int verificationAuthentification(char *message,int tailleMsg)
     }
 
     j=0;
-    while(i<tailleMsg && j<6 && message[i]!='#')
+    while(i<tailleMsg && j<5 && message[i]!='#')
     {
         id[j]=message[i];
         j++;
@@ -227,7 +228,6 @@ int creationCompte(char *message,int longMsg)
 }
 
 /*on extrait l'id de la chaine, et on verifie que l'id existe*/
-//attention peu etre bug
 int extraireIdClient(char **message,int tailleMsg,char *id)
 {
     FILE *user=NULL;
@@ -273,3 +273,74 @@ int extraireIdClient(char **message,int tailleMsg,char *id)
 
     return termine;
 }
+
+
+int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
+{
+
+    FILE *user=NULL;//ancien fichier d'utilisateur
+    FILE *newUser=NULL; //fichier de remplacement.
+    char tmpId[6];//variable temp d'identifiant utilisateur
+    char c;
+    int indice=0;//astuce pour compter les separateurs: 8 pour acheteur et 9 pour vendeur
+
+    user=fopen("fichiers/user.txt","rb");
+    newUser=fopen("fichiers/newuser.txt","wb");
+
+    if(user==NULL && newUser==NULL)
+    {
+        printf("le fichier \"fichiers/user.txt\" et \"fichiers/newuser.txt\" ne s'ouvrent pas.\n");
+        return -1;
+    }
+
+    //on incremente le nbr d'objet acheté
+    c=fgetc(user);
+    while(c!=EOF)
+    {
+        fgets(tmpId,6,user);
+        fprintf(newUser,"$%s",tmpId);//on ecrit l'identifiant
+        if(!strcmp(idAcheteur,tmpId)){ //si on trouve l'id de l'acheteur
+            indice=8; //astuce pour compter les separateurs
+        }
+        else if(!strcmp(idVendeur,tmpId)){ //si on trouve l'id du vendeur
+            indice=9;//astuce pour compter les separateurs
+        }
+        else indice=0;
+        if(!indice)  //on recopie dans le fichier les mm informations
+        {
+            c=fgetc(user);
+            while(c!=EOF && c!='$')
+            {
+                fprintf(newUser,"%c",c);
+                c=fgetc(user);
+            }
+        }
+        else
+        {
+            c=fgetc(user);
+            int cpt=0; //on compte les #
+            int nbr=0;//on recupère le numero à incrementer
+            while(c!=EOF && c!='$')
+            {
+                if(c=='#') cpt++;
+                fprintf(newUser,"%c",c);
+                if(cpt==indice)
+                {
+                    fscanf(user,"%d",&nbr);
+                    nbr++;
+                    fprintf(newUser,"%d",nbr);
+                }
+
+                c=fgetc(user);
+            }
+        }
+
+    }
+
+    fclose(user);
+    fclose(newUser);
+    //remove("fichiers/user.txt");
+    rename("fichiers/newuser.txt","fichiers/user.txt");
+    return 1;
+}
+

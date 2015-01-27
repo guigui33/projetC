@@ -16,7 +16,6 @@ int main()
     while(1)
     {
         char typeRequete[10];//variable pour connaitre le type de requète
-        char idUti[6];//recupère l'id de l'utilisateur
         int retour=0; //variable d'aide pour les retours de fonction
         char *messageRetour=NULL; //message retour
         char *donnee=NULL; //pointeur sur le message où commence les donnees
@@ -66,44 +65,49 @@ int main()
                     messageRetour="prblm serveur";
                 }
             }
-            else
+            else if(!strncmp(typeRequete,"Deco",4))
             {
-                /*on extrait l'id de la chaine, et on verifie que l'id existe*/
-                retour=extraireIdClient(&donnee,strlen(donnee),idUti);
+                messageRetour="deconnexion";
+            }
 
-                if(retour==0)
+            else if (!strncmp(typeRequete,"acheter",7))
+            {
+                acheterObjet(donnee,strlen(donnee));
+            }
+            else if(!strncmp(typeRequete,"consulter",9))
+            {
+                retour=consulter(donnee,strlen(donnee));
+                if(retour==1)
                 {
-                    messageRetour="prblm msg";
+                    messageRetour="fin fichier";
                 }
-                else if(retour==-1)
+                else if(retour==0)
                 {
-                    messageRetour="prblm Serveur";
+                    messageRetour="probleme message";
                 }
                 else
                 {
-                    if(!strncmp(typeRequete,"Deco",4))
-                    {
-                        messageRetour="deconnexion";
-                    }
-
-                    else if (!strncmp(typeRequete,"acheter",7))
-                    {
-                        acheterObjet(donnee,strlen(donnee),idUti);
-                    }
-                    else if(!strncmp(typeRequete,"consulter",9))
-                    {
-                        consulter(donnee,strlen(donnee),idUti);
-                    }
-                    else if(!strncmp(typeRequete,"vendre",6))
-                    {
-                        vendre(donnee,strlen(donnee),idUti);
-                    }
-                    else
-                    {
-                        messageRetour="type message inconnu"; //utilité?????????
-                    }
+                    messageRetour="prblm serveur";
                 }
             }
+            else if(!strncmp(typeRequete,"vendre",6))
+            {
+                retour=enregistrementObjet(donnee,strlen(donnee));
+                if(retour==1){
+                    messageRetour="enregistrement OK";
+                }
+                else if(retour==0){
+                    messageRetour="enregistrement non ok";
+                }
+                else messageRetour="probleme serveur";
+
+            }
+            else
+            {
+                messageRetour="type message inconnu";
+            }
+
+
             EmissionBinaire(messageRetour,strlen(messageRetour));
             free(message);
             message=NULL;

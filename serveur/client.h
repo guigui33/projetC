@@ -49,4 +49,13 @@ int creationId(char *message,int taille,char *idUti);
 */
 int extraireIdClient(char **message,int tailleMsg,char *id);
 
+/**
+\fn int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
+\brief permet de modifier le fichier utilisateur en modifiant les valeurs de vente et achat effectuées par les utilisateurs
+\param[in] idAcheteur identifiant de l'acheteur de taille 5
+\param[in] idVendeur identifiant du vendeur de taille 5
+\return un entier -1 si erreur de fichier, 1 sinon
+*/
+int incrementerNbrObjet(char *idAcheteur,char *idVendeur);
+
 #endif // CLIENT_H_INCLUDED
