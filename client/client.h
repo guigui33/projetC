@@ -50,7 +50,7 @@ void Terminaison();
     la chaine peut avoir la valeur "quitter" ou l'identifiant suivit du mot de passe
 \return
 */
-void menuConnex(char *msgConnexion);
+void menuConnex();
 
 /**
 \fn void authentification(char *msgConnexion)
@@ -58,7 +58,7 @@ void menuConnex(char *msgConnexion);
 \param char* une chaine de caratère permettant de sauvegarder l'identifiant et le mot de passe
 \return
 */
-void authentification(char *msgConnexion);
+int authentification();
 
 /**
 \fn void creationDeCompte()
@@ -82,4 +82,29 @@ void viderBuffer();
 \return
 */
 void supprCara(char *chaine);
+
+/**
+\fn void menuUtilisateur();
+\brief fonction pemettant d'afficher a l'utilisateur le choix entre la vente ou la consultation d'objet. 1 pour la consultation 2 pour la vente 0 pour Quitter
+\param
+\return
+*/
+void menuUtilisateur();
+
+/**
+\fn void catalogue(char * msgConnexion)
+\brief Fonction qui permet d'afficher le catalogue et de naviguer entre les objets ou d'acheter.1Suivant 2 Precendent 3 Acheter 0 Quitter
+\param
+\return
+*/
+void catalogue();
+
+/**
+\fn void vendre();
+\brief Fonction qui permet d'afficher le catalogue et de naviguer entre les objets ou d'acheter.1Suivant 2 Precendent 3 Acheter 0 Quitter
+\param
+\return
+*/
+void vendre(char * idUser);
+
 #endif

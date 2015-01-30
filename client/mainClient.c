@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "client.h"
-
 int main()
 {
     char *authentification=NULL;
@@ -24,8 +22,7 @@ int main()
 //        Reception(msg);
 //        menu();
         continuer=strncmp(msgConnexion,"quitter",7);
-    }
-    while(continuer);
+    }while(continuer);
    // EmissionBinaire("quitter",7);
     Terminaison();
 
