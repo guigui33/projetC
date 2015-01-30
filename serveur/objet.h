@@ -33,15 +33,6 @@ int enregistrementObjet(char *message,int longMsg);
 int miseAuEnchere(char *idUti,char *idObj,char *message,int tailleMsg);
 
 /**
-\fn int acheterObjet(char *msg,int tailleMsg)
-\brief fonction qui enregistre une enchère si elle est acceptée
-\param[in] msg le message envoyé par l'utilisateur
-\param[in] tailleMsg taille du message
-\return -1 si erreur fichier, 0 si le message est non conforme, 1 sinon
-*/
-int acheterObjet(char *msg,int tailleMsg);
-
-/**
 \fn int consulter(char *msg,int tailleMsg)
 \brief envoie les objets au client qui correspondent au nom et à la description
 \param[in] msg le message envoyé par l'utilisateur
@@ -49,6 +40,52 @@ int acheterObjet(char *msg,int tailleMsg);
 \return -1 si erreur fichier, 0 si message non conforme, 1 sinon
 */
 int consulter(char *msg,int tailleMsg);
+
+/**
+\fn int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enchere)
+\brief extrait l'identifiant objet du message, test si l'id objet est bon
+        test si le vendeur n'achete pas son propore objet
+\param[in][out] msg pointeur sur une chaine
+\param[in] tailleMsg taille du message
+\param[out] idObjet enregistre l'identifiant de l'objet du message
+\param[in] idUti l'identifiant de l'utilisateur
+\param[in] enchere pointeur sur le fichier enchere.txt
+\return 0 si le message n'est pas conforme, -1 si erreur fichier, 1 sinon
+*/
+int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enchere);
+
+/**
+\fn int testPrix(float prix,FILE *enchere)
+\brief test si le prix donné par l'utilisateur est conforme
+\param[in] prix prix donné par l'utilisateur
+\param[in] enchere pointeur sur le fichier enchere.txt
+\return 0 si le prix n'est conforme, 1 si le prix est superieur au prix actuel, -1 en cas d'erreur
+*/
+int testPrix(float prix,FILE *enchere);
+
+/**
+\fn int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere)
+\brief copie le fichier enchere en ajoutant le nouveau prix dans le fichier fichier temporaire "fichiers/enchereTmp.txt",
+        toutes les informations ont été vérifiées
+\param[in] idUti identifiant de l'utilisateur
+\param[in] idObjet identifiant de l'objet
+\param[in] prix le prix proposé par l'utilisateur
+\param[in] enchere pointeur sur le fichier enchere.txt
+\return -1 en cas d'erreur fichier, 1 sinon
+*/
+int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere);
+
+/**
+\fn int acheterObjet(char *msg,int tailleMsg)
+\brief verifie le message envoyé par l'utilisateur qui propose une enchère, si le message est ok, l'enchere est enregistrée.
+\param[in] msg le message envoyé par l'utilisateur sans le mot clé
+\param[in] tailleMsg la taille du message
+\return -1 en cas d'erreur fichier, 0 si le message n'est pas conforme, 1 si tout c'est bien passé.
+*/
+int acheterObjet(char *msg,int tailleMsg);
+
+/*recuperer date systeme, on compare avec la date de fin de l'enchere */
+int testDateEnchere(FILE *enchere);
 
 
 #endif // OBJET_H_INCLUDED
