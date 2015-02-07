@@ -9,7 +9,7 @@
 \param[out] idObjet pointeur de char, qui retourne l'id de l'objet
 \param[in] taille taille de l'id Objet
 \param[out] nomObjet pointeur de char qui retourne le nom de l'objet
-\param[in] tailleNom entiern taille max du nom de l'objet
+\param[in] tailleNom entier taille max du nom de l'objet
 \return le type d'erreur associé, -1 si erreur fichier, 1 si tout c'est bien passé, 0 si le message n'est pas conforme
 */
 int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObjet,int tailleNom);
@@ -142,7 +142,7 @@ int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient);
 \brief concatener dans le msgClient le nbre d'enchere en cours et le nombre de vente en cours de l'identifiant passé en paramètre
 \param[in] idUtilisateur l'identifiant de l'utilisateur
 \param[out] msgClient chaine contenant des informations
-\return -1 si probleme fichier, 1 sinon
+\return 1
 */
 int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient);
 

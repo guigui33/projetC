@@ -17,7 +17,8 @@ int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObje
 {
     char c; //variable temp de lecture de fichier
     int i=0;
-    char idTemp[6];//variable temp id
+    int j=0;
+          char idTemp[6];//variable temp id
     int tempNuObjet=0;//variable tempo pour conserver le num de l'objet
     int nuId=0;
     FILE *objet=NULL;
@@ -30,20 +31,26 @@ int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObje
     }
 
     /*init idobjet + init nomObjet*/
-    while(i<longMsg && i<tailleNom && (*msg)[i]!='#')
+    while(i<tailleNom-1 && i<longMsg && (*msg)[i]!='#')
     {
-        /*on initialise les 3premiers lettres de l'identifiant*/
-        if(i<3)
+        /*on initialise les 3premiers lettres de l'identifiant, on s'assure que l'id soit construit avec des lettres*/
+        if(j<3 && (((*msg)[i]>64 && (*msg)[i]<91) || ((*msg)[i]>96 && (*msg)[i]<123)))
         {
-            idObjet[i]=(*msg)[i];
+            idObjet[j]=(*msg)[i];
+            j++;
         }
         nomObjet[i]=(*msg)[i];
         i++;
     }
     nomObjet[i]='\0';
-    idObjet[3]='\0';
+    idObjet[j]='\0';
     idTemp[0]='\0';
     *msg=&(*msg)[i+1];
+    if(strlen(idObjet)!=3) //si l'identifiant est different de 3 alors probleme avec le nom
+    {
+        printf("identifiant non valable doit contenir 3 caractères minimum.\n");
+        return 0;//probleme msg
+    }
 
     c=fgetc(objet);
     while(c!=EOF)
@@ -73,7 +80,7 @@ int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObje
     if(nuId<10)
     {
         /*si le numero de l'id est à 1 chiffre on met 1 zero devant pour respecter le format de l'id*/
-        sprintf(idObjet,"%s%d%d",idObjet,0,nuId);
+        sprintf(idObjet,"%s0%d",idObjet,nuId);
     }
     else
         sprintf(idObjet,"%s%d",idObjet,nuId);
@@ -89,7 +96,7 @@ int enregistrementObjet(char *message,int longMsg)
     FILE *objet=NULL;
     char idUti[6];
     char idObjet[6];
-    char nomObjet[50];//recuperation du nom objet dans le msg
+    char nomObjet[26];//recuperation du nom objet dans le msg
     char dateDebut[13];
 
     retour=extraireIdClient(&message,longMsg,idUti); //extrait l'id de l'utilisateur du message, verifie que l'id utilisateur existe
@@ -100,7 +107,7 @@ int enregistrementObjet(char *message,int longMsg)
     }
     else if (retour==0)
     {
-        printf("l'identifiant est inconnu\n");
+        printf("l'identifiant utilisateur est inconnu.\n");
         return 0;
     }
 
@@ -111,13 +118,19 @@ int enregistrementObjet(char *message,int longMsg)
         return -1;
     }
 
-    retour=creerIdObjet(&message,strlen(message),idObjet,6,nomObjet,50);
+    retour=creerIdObjet(&message,strlen(message),idObjet,6,nomObjet,26);
 
     if(retour==-1)
     {
         printf("erreur id objet\n");
         fclose(objet);
         return -1;
+    }
+    else if(retour==0)
+    {
+        printf("problème lors de la creation de l'identifiant Objet.\n");
+        fclose(objet);
+        return 0;
     }
 
     retour=testDateMiseEnVente(message,strlen(message),dateDebut,13);
@@ -323,9 +336,11 @@ int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *o
                 return -1;
             }
         }
-        else {
+        else
+        {
             c=fgetc(objet);
-            while(c!=EOF && c!='$'){
+            while(c!=EOF && c!='$')
+            {
                 c=fgetc(objet);
             }
         }
@@ -363,9 +378,11 @@ int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient)
             trouve=1;//on a trouvé le produit
             fseek(enchere,12,SEEK_CUR);//date fin
             c=fgetc(enchere);
-            while(c!=EOF && c!='$'){
+            while(c!=EOF && c!='$')
+            {
                 fscanf(enchere,"%f",&prixTmp);//on recupère le prix enregistré
-                if(prix==0){
+                if(prix==0)
+                {
                     prix=prixTmp;//on recupere le premier prix lu, peut etre le prix de depart ou la dernière enchere
                 }
                 c=fgetc(enchere);
@@ -448,7 +465,6 @@ int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enc
 }
 
 /*recuperer date systeme, on compare avec la date de fin de l'enchere */
-/*date fin = HHMMJJMMAAAA*/
 /*ajouter les 15 minustes si delai<15mn*60s*/
 int testDateEnchere(FILE *enchere)
 {
@@ -660,10 +676,11 @@ int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient)
     int nbrEnchere=0;
 
     enchere=fopen(FichierEnchere,"rb");
-    if(enchere==NULL)
+    if(enchere==NULL)//si fichier inexistant on retourne pas d'enchere pas de vente
     {
         printf("le fichier enchere.txt ne s'ouvre pas.\n");
-        return -1;//probleme d'ouverture fichier
+        sprintf(msgClient,"%s#0#0\n",msgClient);
+        return 1;
     }
 
     c=fgetc(enchere);
@@ -698,7 +715,8 @@ int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient)
                 }
             }
         }
-        while(c!=EOF && c!='$'){
+        while(c!=EOF && c!='$')
+        {
             c=fgetc(enchere);
         }
     }

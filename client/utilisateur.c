@@ -391,7 +391,7 @@ int rechercheObjet(char *idUser)
     if(strcmp(nom,"tous"))
     {
         printf("entrez une description de produit à rechercher [100 caractères maximum]:\n");
-        printf("(tapez entré si aucune description.)\n");
+        printf("(tapez entrée si aucune description.)\n");
 
         do
         {

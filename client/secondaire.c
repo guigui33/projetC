@@ -43,11 +43,28 @@ int controleChaine(char *chaine,char *indice)
         }
         else
         {
-                printf("Le nom rentré par l'utilisateur n'est pas conforme.\n");
+            int i=0;
+            int j=0;
+            int taille=strlen(chaine);//taille du nom
+            while(j<3 &&i<taille)
+            {
+                /*on s'assure que le nom contient bien 3 caractères exploitables*/
+                if((chaine[i]>64 && chaine[i]<91) || (chaine[i]>96 && chaine[i]<123))
+                {
+                    j++;
+                }
+                i++;
+            }
+            if(j<3) //si l'identifiant est different de 3 alors probleme avec le nom
+            {
+                printf("identifiant non valable doit contenir 3 caractères minimum [aA-zZ].\n");
+                return 0;//probleme msg
+            }
+            return 1;
         }
     }
 
-    if(!strcmp(indice,"recherche"))
+    if(!strcmp(indice,"recherche"))//peut etre vide
     {
         return 1;
     }
@@ -96,12 +113,14 @@ void dateFinEnchere(char *date)
 int dateNaissance(char *date)
 {
     struct tm naissance;//struct pour la date actuel
-    if(scanf("%2d/%2d/%4d",&(naissance.tm_mday),&(naissance.tm_mon),&(naissance.tm_year))!=3){
+    if(scanf("%2d/%2d/%4d",&(naissance.tm_mday),&(naissance.tm_mon),&(naissance.tm_year))!=3)
+    {
         viderBuffer();//on vide le buffer
         return 0;
     }
     viderBuffer();//on vide le buffer
-    if(naissance.tm_mday<1 || naissance.tm_mday>31 || naissance.tm_mon<1 || naissance.tm_mon>12 || naissance.tm_year>2016 || naissance.tm_year<1920){
+    if(naissance.tm_mday<1 || naissance.tm_mday>31 || naissance.tm_mon<1 || naissance.tm_mon>12 || naissance.tm_year>2016 || naissance.tm_year<1920)
+    {
         return 0;
     }
     naissance.tm_mon  -=1 ;   // commence à janvier=0 pour les mois

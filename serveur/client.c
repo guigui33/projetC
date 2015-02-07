@@ -84,16 +84,26 @@ int creationId(char *message,int taille,char *idUti)
         i++;
     }
     i++; //on passe le #
-    /*on initialise les 3 premiers caractères de l'identifiant*/
-    while(i<taille && j<3 && message[i]!='#')
+
+    while(i<taille && message[i]!='#')
     {
-        idUti[j]=message[i];
+        /*on initialise les 3premiers lettres de l'identifiant, on s'assure que l'id soit construit avec des lettres*/
+        if(j<3 && ((message[i]>64 && message[i]<91) || (message[i]>96 && message[i]<123)))
+        {
+            idUti[j]=message[i];
+            j++;
+        }
         i++;
-        j++;
     }
 
-    idUti[3]='\0';
+    idUti[j]='\0';
     id[0]='\0';
+
+    if(strlen(idUti)!=3) //si l'identifiant est different de 3 alors probleme avec le nom
+    {
+        printf("identifiant non valable doit contenir 3 caractères minimum.\n");
+        return 0;//probleme msg
+    }
 
     user=fopen(FichierUser,"rb"); //ouverture fichier en lecture
     if(user==NULL)
