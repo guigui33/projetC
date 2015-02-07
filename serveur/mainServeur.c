@@ -17,100 +17,116 @@ int main()
     {
         char typeRequete[10];//variable pour connaitre le type de requète
         int retour=0; //variable d'aide pour les retours de fonction
-        char *messageRetour=NULL; //message retour
+        int fin=0;
+        char messageRetour[100]; //message retour
         char *donnee=NULL; //pointeur sur le message où commence les donnees
-
 
         AttenteClient();
 
-        message = Reception();
-
-        printf("J'ai recu %s\n",message);
-
-        if(message!=NULL)
+        while(!fin)
         {
-            /*on extrait le type de requète*/
-            extraireTypeRequete(message,strlen(message),&donnee,typeRequete);
-            if(!strncmp(message,"create",6))
+            message = Reception();
+
+            printf("J'ai recu %s\n",message);
+
+            if(message!=NULL)
             {
-                retour=creationCompte(donnee,strlen(donnee));
-                if(retour==1)
+                /*on extrait le type de requète*/
+                extraireTypeRequete(message,strlen(message),&donnee,typeRequete);
+                if(!strncmp(message,"creerCpt",8))
                 {
-                    messageRetour="ok"; //faire le retour erreur
+                    char id[6];
+                    retour=creationCompte(donnee,strlen(donnee),id);
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s#%s","cptEnregistre",id);
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurEnregistrement");
+                    }
+
                 }
-                else if(retour==0)
+                else if(!strncmp(typeRequete,"connex",6))
                 {
-                    messageRetour="nonOk";
+                    /*verification de l'id et du mot de passe de l'utilisateur*/
+                    retour=verificationAuthentification(donnee,strlen(donnee));
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","connexOk");
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurIdMdp");
+                    }
+                }
+                else if(!strncmp(typeRequete,"Deco",4))
+                {
+                    sprintf(messageRetour,"%s","deconnexion");
+                    fin=1;
+                }
+                else if (!strncmp(typeRequete,"acheter",7))
+                {
+                    retour=acheterObjet(donnee,strlen(donnee));
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","enchereEnregistree");
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurEnchere");
+                    }
+                }
+                else if(!strncmp(typeRequete,"consulter",9))
+                {
+                    retour=consulter(donnee,strlen(donnee));
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","EOF"); //fin de fichier
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurConsulter");
+                    }
+                }
+                else if(!strncmp(typeRequete,"vendre",6))
+                {
+                    retour=enregistrementObjet(donnee,strlen(donnee));
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","objEnregistre");
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurEnregistrement");
+                    }
+                }
+                else if(!strncmp(typeRequete,"infoCpt",7))
+                {
+                    retour=informationUtilisateur(donnee,strlen(donnee));
+                    if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","infoCptEnvoyee");
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurEnvoieInfo");
+                    }
                 }
                 else
                 {
-                    messageRetour="prblmServeur";
+                    sprintf(messageRetour,"%s","erreurMessage");
                 }
-
-            }
-            else if(!strncmp(typeRequete,"Connex",6))
-            {
-                /*verification de l'id et du mot de passe de l'utilisateur*/
-                retour=verificationAuthentification(donnee,strlen(donnee));
-                if(retour==1)
+                if(retour==-1)
                 {
-                    messageRetour="connexOk";
+                    sprintf(messageRetour,"%s","erreurServeur");
                 }
-                else if(retour==0)
-                {
-                    messageRetour="connexNon";
-                }
-                else
-                {
-                    messageRetour="prblm serveur";
-                }
+                printf("envoie des données: %s\n",messageRetour);
+                strcat(messageRetour,"\n");
+                EmissionBinaire(messageRetour,strlen(messageRetour));
+                free(message);
+                message=NULL;
             }
-            else if(!strncmp(typeRequete,"Deco",4))
-            {
-                messageRetour="deconnexion";
-            }
-
-            else if (!strncmp(typeRequete,"acheter",7))
-            {
-                acheterObjet(donnee,strlen(donnee));
-            }
-            else if(!strncmp(typeRequete,"consulter",9))
-            {
-                retour=consulter(donnee,strlen(donnee));
-                if(retour==1)
-                {
-                    messageRetour="fin fichier";
-                }
-                else if(retour==0)
-                {
-                    messageRetour="probleme message";
-                }
-                else
-                {
-                    messageRetour="prblm serveur";
-                }
-            }
-            else if(!strncmp(typeRequete,"vendre",6))
-            {
-                retour=enregistrementObjet(donnee,strlen(donnee));
-                if(retour==1){
-                    messageRetour="enregistrement OK";
-                }
-                else if(retour==0){
-                    messageRetour="enregistrement non ok";
-                }
-                else messageRetour="probleme serveur";
-
-            }
-            else
-            {
-                messageRetour="type message inconnu";
-            }
-
-
-            EmissionBinaire(messageRetour,strlen(messageRetour));
-            free(message);
-            message=NULL;
         }
 
         TerminaisonClient();

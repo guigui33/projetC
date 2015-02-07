@@ -3,6 +3,11 @@
 #include <string.h>
 #include <errno.h>
 #include "client.h"
+#include "objet.h"
+#include "serveur.h"
+
+#define FichierNewUser "/home/guigui/Documents/L3/Projet/serveur/fichiers/newUser.txt"
+#define FichierUser "/home/guigui/Documents/L3/Projet/serveur/fichiers/user.txt"
 
 /*on recherche l'identifiant et le mot de passe dans le fichier*/
 int chercherFichierIdMdp(char *idChr,char *mdpChr)
@@ -14,7 +19,7 @@ int chercherFichierIdMdp(char *idChr,char *mdpChr)
     int trouve=0; //boolean de test de boucle
     int mdpOK=0;//valeur de retour
     FILE *user=NULL;
-    user=fopen("fichiers/user.txt","rb");
+    user=fopen(FichierUser,"rb");
 
     if(user==NULL)
     {
@@ -71,20 +76,26 @@ int creationId(char *message,int taille,char *idUti)
     int tmpNbrId=0;//variable temp pour récuperer numero id dans le fichier
     char c;
     int i=0;
+    int j=0;
 
-    /*on initialise les 3 premiers caractères de l'identifiant*/
-    while(i<taille && message[i]!='#') i++; //on passe le mot de passe
-    i++;
-    while(i<taille && i<3 && message[i]!='#')
+    /*on passe le mot de passe*/
+    while(i<taille && message[i]!='#')
     {
-        idUti[i]=message[i];
         i++;
+    }
+    i++; //on passe le #
+    /*on initialise les 3 premiers caractères de l'identifiant*/
+    while(i<taille && j<3 && message[i]!='#')
+    {
+        idUti[j]=message[i];
+        i++;
+        j++;
     }
 
     idUti[3]='\0';
     id[0]='\0';
 
-    user=fopen("fichiers/user.txt","rb"); //ouverture fichier en lecture
+    user=fopen(FichierUser,"rb"); //ouverture fichier en lecture
     if(user==NULL)
     {
         perror("erreur d'ouverture de fichier");
@@ -133,19 +144,11 @@ int creationId(char *message,int taille,char *idUti)
 /*verifie l'identifiant du client et son mot de passe*/
 int verificationAuthentification(char *message,int tailleMsg)
 {
-    FILE *users=NULL;
     int i=0; //variable de boucle
     int j=0; //boucle
     char id[6]; // recuperation identifiant dans le message
     char mdp[16];// recuperation mot de passe dans le message
     int verifOK=0;
-
-    users=fopen("fichiers/user.txt","rb"); // on ouvre le fichier en lecture
-    if(users==NULL)
-    {
-        perror("le fichier fichiers/user.txt n'existe pas\n");
-        return -1;
-    }
 
     j=0;
     while(i<tailleMsg && j<5 && message[i]!='#')
@@ -164,45 +167,24 @@ int verificationAuthentification(char *message,int tailleMsg)
         j++;
         i++;
     }
-    mdp[i]='\0';
+    mdp[j]='\0';
 
     verifOK=chercherFichierIdMdp(id,mdp);
-
-    fclose(users);
 
     return verifOK;
 }
 
 /*fonction a refaire, a faire controle d'erreur !!!!!!*/
-int creationCompte(char *message,int longMsg)
+int creationCompte(char *message,int longMsg,char *id)
 {
     FILE *user=NULL;//fichier d'utilisateur
-    char id[6];
     int retour=0; //variable de retour erreur fonction
-    int cpt=0; //compteur de #
-    int i=0; //indice message
 
-    user=fopen("fichiers/user.txt","ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
+    user=fopen(FichierUser,"ab"); //ouverture fichier en ajout, si fichier inexistant il sera créé
     if(user==NULL)
     {
         perror("erreur d'ouverture de fichier");
         return -1; //on returne une erreur
-    }
-    /*verification du nombre de separateur*/
-    while(i<longMsg)
-    {
-        if(message[i]=='#')
-        {
-            cpt++;
-        }
-        i++;
-    }
-
-    if(cpt!=8)
-    {
-        printf("le format du message non respecté\n");
-        fclose(user);
-        return 0;
     }
 
     retour=creationId(message,longMsg,id);
@@ -219,6 +201,10 @@ int creationCompte(char *message,int longMsg)
         fclose(user);
         return 0;
     }
+
+    //retour=testRenseignementCreation(message,strlen(message));
+
+    supprCaractere(message);//suppr le \n
 
     fprintf(user,"$%s#%s#0#0",id,message);
 
@@ -245,7 +231,7 @@ int extraireIdClient(char **message,int tailleMsg,char *id)
     id[5]='\0';
     *message=&(*message)[i];
 
-    user=fopen("fichiers/user.txt","rb");
+    user=fopen(FichierUser,"rb");
     if(user==NULL)
     {
         printf("erreur d'ouverture de fichier \"fichiers/user.txt\" en mode lecture\n");
@@ -277,15 +263,14 @@ int extraireIdClient(char **message,int tailleMsg,char *id)
 
 int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
 {
-
     FILE *user=NULL;//ancien fichier d'utilisateur
     FILE *newUser=NULL; //fichier de remplacement.
     char tmpId[6];//variable temp d'identifiant utilisateur
     char c;
     int indice=0;//astuce pour compter les separateurs: 8 pour acheteur et 9 pour vendeur
 
-    user=fopen("fichiers/user.txt","rb");
-    newUser=fopen("fichiers/newuser.txt","wb");
+    user=fopen(FichierUser,"rb");
+    newUser=fopen(FichierNewUser,"wb");
 
     if(user==NULL && newUser==NULL)
     {
@@ -299,11 +284,13 @@ int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
     {
         fgets(tmpId,6,user);
         fprintf(newUser,"$%s",tmpId);//on ecrit l'identifiant
-        if(!strcmp(idAcheteur,tmpId)){ //si on trouve l'id de l'acheteur
-            indice=8; //astuce pour compter les separateurs
+        if(!strcmp(idAcheteur,tmpId))  //si on trouve l'id de l'acheteur
+        {
+            indice=10; //astuce pour compter les separateurs
         }
-        else if(!strcmp(idVendeur,tmpId)){ //si on trouve l'id du vendeur
-            indice=9;//astuce pour compter les separateurs
+        else if(!strcmp(idVendeur,tmpId))  //si on trouve l'id du vendeur
+        {
+            indice=11;//astuce pour compter les separateurs
         }
         else indice=0;
         if(!indice)  //on recopie dans le fichier les mm informations
@@ -340,7 +327,140 @@ int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
     fclose(user);
     fclose(newUser);
     //remove("fichiers/user.txt");
-    rename("fichiers/newuser.txt","fichiers/user.txt");
+    rename(FichierNewUser,FichierUser);
     return 1;
+}
+
+/*cherche le nom et prenom de l'identifiant + le nombre d'objet acheté et vendu par celui-ci*/
+int donneeUtilisateur(char *idPro,char *msgClient,char *fonction)
+{
+    char c;
+    int trouve=0;//bool 1 si le id proprietaire est trouve, 0 sinon
+    FILE *user=NULL;//fichier utilisteur
+    int typeFonction=0;
+
+    user=fopen(FichierUser,"rb");
+    if(user==NULL)
+    {
+        printf("probleme pour ouvrir le fichier user.txt.\n");
+        return -1;
+    }
+
+    if(!strcmp(fonction,"information"))//informationCompte
+    {
+        typeFonction=1;
+    }
+    if(!strcmp(fonction,"donneeObjetCatalogue"))
+    {
+        typeFonction=0;
+    }
+
+    c=fgetc(user);
+    while(c!=EOF && !trouve)
+    {
+        int i=0;
+        char idTmp[6];//identifiant temporaire
+        fgets(idTmp,6,user);
+        c=fgetc(user);//on passe le #
+        if(!strcmp(idTmp,idPro))//on a trouve l'identifiant recherché
+        {
+            trouve=1;//on a trouve l'id recherché
+            c=fgetc(user);
+            while(c!='#' && c!=EOF)
+            {
+                c=fgetc(user);//on passe le mot de passe
+            }
+            recupererInfoUti(msgClient,&c,'#',user);//on recup nom
+            recupererInfoUti(msgClient,&c,'#',user);//on recup prenom
+            while(typeFonction==1 && i<6)
+            {
+                i++;
+                recupererInfoUti(msgClient,&c,'#',user);//on recupere les autres infos
+            }
+            while(typeFonction==0 && i<6)
+            {
+                i++;
+                c=fgetc(user);
+                while(c!=EOF && c!='#')
+                {
+                    c=fgetc(user);
+                }
+            }
+            recupererInfoUti(msgClient,&c,'#',user);//objet acheté
+            recupererInfoUti(msgClient,&c,'$',user);//objet vendu
+        }
+        else
+        {
+            while(c!=EOF && c!='$')
+            {
+                c=fgetc(user);
+            }
+        }
+    }
+    fclose(user);
+
+    if(!trouve)
+    {
+        return -1;//l'identifiant n'a pas été trouvé on retourne une erreur
+    }
+
+    return 1;
+}
+
+int informationUtilisateur(char *message,int tailleMsg)
+{
+    char idUtilisateur[6];
+    int retour=0;
+    char msgClient[500]="$";//le pire cas 500 caractères
+
+    retour=extraireIdClient(&message,tailleMsg,idUtilisateur);
+    if(retour==-1)
+    {
+        printf("problème d'ouverture fichier user.txt\n");
+        return -1;
+    }
+    else if (retour==0)
+    {
+        printf("l'identifiant utilisateur est inconnu\n");
+        return 0;
+    }
+
+    strcat(msgClient,idUtilisateur);
+    if(donneeUtilisateur(idUtilisateur,msgClient,"information")<0)
+    {
+        return -1;//erreur fichier
+    }
+    if(nbrVenteEnchereUtilisateur(idUtilisateur,msgClient)<0)
+    {
+        return -1;//erreur fichier
+    }
+    printf("informations: %s",msgClient);
+    if(EmissionBinaire(msgClient,strlen(msgClient))<=0)
+    {
+        return -1;
+    }
+
+    return 1;
+}
+
+void recupererInfoUti(char *msg,char *c,char separateur,FILE *file)
+{
+    int i=0;//indice tab
+    char tmp[101];//plus grande chaine dans le fichier utilisateur
+
+    *c=fgetc(file);
+    while(*c!=separateur && *c!=EOF)
+    {
+        if(*c!='\n')
+        {
+            tmp[i]=*c;
+            i++;
+        }
+        *c=fgetc(file);
+    }
+    tmp[i]='\0';
+    strcat(msg,"#");
+    strcat(msg,tmp);
+    return;
 }
 

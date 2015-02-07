@@ -43,45 +43,13 @@ int EmissionBinaire(char *donnees, size_t taille);
  */
 void Terminaison();
 
+/******************************************************************/
+
 /**
-\fn void menuConnex(char *msgConnexion)
-\brief fonction permettant d'afficher le menu, l'utilisateur fait sont choix
-\param char* une chaine de caractère permettant de retourner les paramêtres de connexion
-    la chaine peut avoir la valeur "quitter" ou l'identifiant suivit du mot de passe
-\return
+\fn void menuConnex()
+\brief fonction permettant d'afficher le menu, l'utilisateur fait sont choix de se connecter, de quitter ou de creer un compte
 */
 void menuConnex();
-
-/**
-\fn void authentification(char *msgConnexion)
-\brief fonction pemettant d'afficher le menu d'authentification, l'utilisateur entre son mot de passe et son identifiant
-\param char* une chaine de caratère permettant de sauvegarder l'identifiant et le mot de passe
-\return
-*/
-int authentification();
-
-/**
-\fn void creationDeCompte()
-\brief fonction permettant d'afficher la creation de compte
-\param
-\return
-*/
-void creationDeCompte();
-
-/**
-\fn void viderBuffer()
-\brief vide le buffer
-*/
-void viderBuffer();
-
-/**
-\fn void supprCara(char *chaine)
-\brief fonction qui permet de remplacer le '\n' par '\0'
-        si l'utilisateur a entrée trop de caractère (le '\n' n'est pas trouvé) on vide le buffer
-\param char* un pointeur sur une chaine
-\return
-*/
-void supprCara(char *chaine);
 
 /**
 \fn void menuUtilisateur();
@@ -90,21 +58,5 @@ void supprCara(char *chaine);
 \return
 */
 void menuUtilisateur();
-
-/**
-\fn void catalogue(char * msgConnexion)
-\brief Fonction qui permet d'afficher le catalogue et de naviguer entre les objets ou d'acheter.1Suivant 2 Precendent 3 Acheter 0 Quitter
-\param
-\return
-*/
-void catalogue();
-
-/**
-\fn void vendre();
-\brief Fonction qui permet d'afficher le catalogue et de naviguer entre les objets ou d'acheter.1Suivant 2 Precendent 3 Acheter 0 Quitter
-\param
-\return
-*/
-void vendre(char * idUser);
 
 #endif

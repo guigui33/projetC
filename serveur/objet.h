@@ -2,15 +2,17 @@
 #define OBJET_H_INCLUDED
 
 /**
-\fn int creerIdObjet(char *msg,int longMsg,char *idObjet,int taille)
-\brief creer l'identifiant objet
-\param [in]msg pointeur de char
-\param [in]longMsg un entier, longueur du msg
-\param [out]idObjet pointeur de char, qui represente l'id de l'objet à initialiser
-\param [in]taille taille de l'id Objet
-\return le type d'erreur associé, -1 si erreur fichier, 1 si tout c'est bien passé
+\fn int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObjet,int tailleNom)
+\brief creer l'identifiant objet, retourne le nom de l'objet, le nom de l'identifiant de l'objet
+\param[in][out] msg contient l'adresse du premier element du message
+\param[in] longMsg un entier, longueur du msg
+\param[out] idObjet pointeur de char, qui retourne l'id de l'objet
+\param[in] taille taille de l'id Objet
+\param[out] nomObjet pointeur de char qui retourne le nom de l'objet
+\param[in] tailleNom entiern taille max du nom de l'objet
+\return le type d'erreur associé, -1 si erreur fichier, 1 si tout c'est bien passé, 0 si le message n'est pas conforme
 */
-int creerIdObjet(char *msg,int longMsg,char *idObjet,int taille);
+int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObjet,int tailleNom);
 
 /**
 \fn int enregistrementObjet(char *message,int longMsg)
@@ -84,8 +86,64 @@ int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere);
 */
 int acheterObjet(char *msg,int tailleMsg);
 
-/*recuperer date systeme, on compare avec la date de fin de l'enchere */
+/**
+\fn int testDateEnchere(FILE *enchere)
+\brief test s'il toujours possible d'encherir au moment de l'envoi du message par le client.
+\param[in] enchere pointeur sur un fichier enchere.txt, le curseur est au niveau de la date de fin de l'objet
+\return 0 si l'enchere est finie, 1 sinon
+*/
 int testDateEnchere(FILE *enchere);
 
+
+/**
+\fn int testDateMiseEnVente(char *message,int tailleMsg,char *dateDebut,int tailleDate)
+\brief test si la date de fin d'enchere indiquée par l'utilisateur est conforme avec le debut de mise en vente de l'objet
+        initialise date debut si date de fin ok.
+\param[in] message le message envoyé par l'utilisateur pointant sur la date de fin de l'enchere
+\param[in] tailleMsg la taille du message
+\param[out] dateDebut recupère la date systeme correspondant au debut de mise en vente de l'objet
+\param[in] tailleDate taille de la date
+\return 0 si la date indiquée par l'utilisateur n'est pas conforme, 1 sinon
+*/
+int testDateMiseEnVente(char *message,int tailleMsg,char *dateDebut,int tailleDate);
+
+/**
+\fn void supprCaractere(char *message)
+\brief supprime le \n du message
+\param[in][out] message un tableau de char
+*/
+void supprCaractere(char *message);
+
+/**
+\fn int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *objet)
+\brief rechercher les differentes informations des objets disponibles à la vente qui correspondent au nom et la description
+        données par l'utilisateur. Envoie les données au client.
+\param[in] idUtili l'identifiant de l'utilisateur
+\param[in] nomRch le nom des objets à rechercher
+\param[in] descriptionRch la descriptions des objets à rechercher
+\param[in] objet le fichier qui contient les informations sur les objets en vente
+\return -1 si probleme fichier, 1 sinon
+*/
+int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *objet);
+
+/**
+\fn int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient)
+\brief complète le msgClient par des informations sur l'enchere, à la fin de la fonction le msgClient contient les données
+        objet + les données propriétaire + les données enchères(en fin de fonction)
+\param[in] idUtili l'identifiant de l'utilisateur
+\param[in] idObjet identifiant objet à rechercher
+\param[out] msgClient chaine contenant les informations de l'objet et du proprietaire de l'objet, 500 caractères maximum
+\return -1 si probleme fichier, 1 sinon
+*/
+int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient);
+
+/**
+\fn int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient)
+\brief concatener dans le msgClient le nbre d'enchere en cours et le nombre de vente en cours de l'identifiant passé en paramètre
+\param[in] idUtilisateur l'identifiant de l'utilisateur
+\param[out] msgClient chaine contenant des informations
+\return -1 si probleme fichier, 1 sinon
+*/
+int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient);
 
 #endif // OBJET_H_INCLUDED

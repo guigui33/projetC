@@ -15,9 +15,10 @@ int verificationAuthentification(char *message,int tailleMsg);
 \brief enregistre les données du nouvel utilisateur, les données sont verifiées, la creation est annulée si erreur.
 \param[in] message un pointeur sur une chaine de caractère
 \param[in] longMsg taille du message
+\param[out] id identifiant utilisateur
 \return retourne 0 en cas d'erreur message, -1 en cas d'erreur fichier, 1 sinon.
 */
-int creationCompte(char *message,int longMsg);
+int creationCompte(char *message,int longMsg,char *id);
 
 /**
 \fn int chercherFichierIdMdp(char *idChr,char *mdpChr)
@@ -57,5 +58,34 @@ int extraireIdClient(char **message,int tailleMsg,char *id);
 \return un entier -1 si erreur de fichier, 1 sinon
 */
 int incrementerNbrObjet(char *idAcheteur,char *idVendeur);
+
+/**
+\fn int donneeUtilisateur(char *idUtilisateur,char *msgClient)
+\brief concatene les informations de l'utilisateur de l'identifiant dans le msgClient
+\param[in] idUtilisateur l'identifiant de l'utilisateur
+\param[out] msgClient chaine contenant des informations
+\param[in] fonction nom de la fonction qui utilise cette fonction
+\return -1 si probleme fichier, 1 sinon
+*/
+int donneeUtilisateur(char *idPro,char *msgClient,char *fonction);
+
+/**
+\fn int informationUtilisateur(char *message,int tailleMsg)
+\brief envoie les informations concernant l'utilisateur
+\param[in] message tableau de char contenant les informations de l'utilisateur
+\param[in] taille la taille du message
+\return -1 si probleme fichier, 0 si probleme message, 1 sinon
+*/
+int informationUtilisateur(char *message,int tailleMsg);
+
+/**
+\fn void recupererInfoUti(char *msg,char *c,char separateur,FILE *file)
+\brief recuperer une information cilbée dans le fichier utilisateur et concatene dans le msg
+\param[out] msg pointeur sur une chaine
+\param[in][out] c pointeur sur un caractère, permet de savoir où on est dans le fichier
+\param[in] separateur un caratère qui termine la lecture de l'information
+\param[in] file un pointeur sur un fichier
+*/
+void recupererInfoUti(char *msg,char *c,char separateur,FILE *file);
 
 #endif // CLIENT_H_INCLUDED
