@@ -10,15 +10,16 @@
 #define FichierObjetEnVente "/home/guigui/Documents/L3/Projet/serveur/fichiers/objets_en_vente.txt"
 #define FichierEnchere "/home/guigui/Documents/L3/Projet/serveur/fichiers/enchere.txt"
 #define FichierEnchereTmp "/home/guigui/Documents/L3/Projet/serveur/fichiers/enchereTmp.txt"
+#define FichierFinEnchere "/home/guigui/Documents/L3/Projet/serveur/fichiers/finEnchere.txt"
+
 
 /*creer l'id de l'objet, sur 5 caractères, 3premieres lettre du nom+ 2chiffres*/
-/*ajouter message ok*/
 int creerIdObjet(char **msg,int longMsg,char *idObjet,int tailleId,char *nomObjet,int tailleNom)
 {
     char c; //variable temp de lecture de fichier
     int i=0;
     int j=0;
-          char idTemp[6];//variable temp id
+    char idTemp[6];//variable temp id
     int tempNuObjet=0;//variable tempo pour conserver le num de l'objet
     int nuId=0;
     FILE *objet=NULL;
@@ -178,15 +179,45 @@ int miseAuEnchere(char *idUti,char *idObj,char *message,int tailleMsg)
     return 1;
 }
 
+/*ecrit les informations du fichier dans chaine jusqu'à lire le separateur*/
+void recupererInfoFichier(char *chaine,int taille,char separateur,char *c,FILE *file)
+{
+    int i=0;
+    *c=fgetc(file);
+    while(i<taille-1 && *c!=separateur && *c!=EOF)
+    {
+        if(*c!='\n')
+        {
+            chaine[i]=*c;
+            i++;
+        }
+        *c=fgetc(file);
+    }
+    chaine[i]='\0';
+}
+
+/*extrait dans rchr, les données du messgae jusqu'a lire le separateur*/
+void extraireDonneeMsg(char *message,int tailleMsg,char* rchr,char tailleRchr,int *i,char separateur)
+{
+    int j=0;
+
+    while(*i<tailleMsg && j<tailleRchr-1 && message[*i]!=separateur)
+    {
+        rchr[j]=message[*i];
+        (*i)++;
+        j++;
+    }
+    rchr[j]='\0';
+    (*i)++;
+}
 
 int consulter(char *message,int tailleMsg)
 {
     int retour=0;//bool pour savoir si le client desire voir tous les objets mises en vente
     char nomRch[26];//nom de l'objet à rechercher à extraire du msg
+    char categorieRch[26];//???taille
     char descriptionRch[101]; //description de l'objet à rechercher à extraire du msg
     char idUti[6];//identifiant du client
-    FILE *objet=NULL;
-    int j=0;
     int i=0;
 
     retour=extraireIdClient(&message,tailleMsg,idUti); //extrait l'id de l'utilisateur du message, verifie que l'id utilisateur existe
@@ -202,138 +233,85 @@ int consulter(char *message,int tailleMsg)
         printf("l'identifiant est inconnu\n");
         return 0;
     }
-    /*on extrait le nom de la recherche à effectuer*/
-    while(i<tailleMsg && j<25 && message[i]!='#')
-    {
-        nomRch[j]=message[i];
-        i++;
-        j++;
-    }
-    i++;// on passe le #
-    nomRch[j]='\0';
+    extraireDonneeMsg(message,tailleMsg,nomRch,26,&i,'#');
+    extraireDonneeMsg(message,tailleMsg,categorieRch,26,&i,'#');
+    extraireDonneeMsg(message,tailleMsg,descriptionRch,101,&i,'\n');
 
-    if(nomRch[0]=='\0') // si le nom est vide problème message
-    {
-        printf("le message n'est pas conforme.\n");
-        return 0;
-    }
+    retour=rechercherObjet(idUti,nomRch,categorieRch,descriptionRch,0);//on va recuperer les donnees à envoyer au client dans les differents fichiers
 
-    j=0;
-    while(i<tailleMsg && j<100 && message[i]!='\n')
-    {
-        descriptionRch[j]=message[i];
-        i++;
-        j++;
-    }
-    descriptionRch[j]='\0'; //la description peut etre vide
+    return retour;//retourne 1 si ok, -1 sinon
+}
+
+int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch)
+{
+    FILE *objet=NULL;
+    char c;
+    char msgClient[500];//message à envoyer au client contient les infos objet+proprio+enchere
+    char tmp[40];//variable utilisée pour sauvegarder les données dates et prix
+    char idObjetTmp[6];//id de l'objet
+    char nomObjet[26];//nom de l'objet
+    char description[100];//description de l'objet
+    char categorie[26];//categorie de l'objet sur 25 caracteres
+    int trouve=0;
 
     objet=fopen(FichierObjetEnVente,"rb");
     if(objet==NULL)
     {
-        printf("erreur d'ouverture du fichier objets_en_vente.txt\n");
-        return -1;
+        return 0;
     }
 
-    retour=donneeObjetCatalogue(idUti,nomRch,descriptionRch,objet);//on va recuperer les donnees à envoyer au client dans les differents fichiers
-
-
-    fclose(objet);
-    return retour;//retourne 1 si ok, -1 sinon
-}
-
-
-int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *objet)
-{
-    char msgClient[500];//message à envoyer au client contient les infos objet+proprio+enchere
-    char tmp[35];//varaible utilisée pour sauvegarder les données dates et prix
-    char idPro[6];//identifiant de du propietaire de l'objet
-    char idObjet[6];//id de l'objet
-    char nomObjet[26];//nom de l'objet
-    char description[100];//description de l'objet
-    char categorie[26];//categorie de l'objet sur 25 caracteres
-    char c;
-    int tous=0;//bool pour savoir si il faut envoyer tous les objets ou non
-
-    tous=strcmp(nomRch,"tous");//on test si le nom=tous, mot clé pour envoyer tous les objets mises en vente
-
     c=fgetc(objet);
-    while(c!=EOF)
+    while(c!=EOF && !trouve)
     {
         int i=0;
         /*recuperation id de l'objet*/
-        fgets(idObjet,6,objet);
-        fgetc(objet);//on passe le #
-        fgets(idPro,6,objet);//on recupere l'identifiant du proprietaire de l'objet
-        /*recupere nom objet max 25 caractère*/
-        fgetc(objet);//on passe le #
-        c=fgetc(objet);
-        while(c!=EOF && i<25 && c!='#')
+        fgets(idObjetTmp,6,objet);
+        if(!strcmp(idObjet,idObjetTmp))
         {
-            nomObjet[i]=c;
+            int tous=0;//bool pour savoir si il faut envoyer tous les objets ou non
+            int envoyer=0;
+            trouve=1;
+            fseek(objet,7,SEEK_CUR);//on passe #+l'id du propietaire et le #
+            recupererInfoFichier(nomObjet,26,'#',&c,objet);
+            fgets(tmp,27,objet); //dateDeb#dateFin#
             c=fgetc(objet);
-            i++;
-        }
-        nomObjet[i]='\0';
-        fgets(tmp,27,objet); //dateDeb#dateFin#
-        i=26;
-        c=fgetc(objet);
-        /*on recupere le prix de depart de l'objet*/
-        while(i<35 && c!=EOF && c!='#')
-        {
-            tmp[i]=c;
-            i++;
-            c=fgetc(objet);
-        }
-        tmp[i]='\0';
-
-        i=0;
-        c=fgetc(objet);
-        while(i<100 && c!=EOF && c!='#')
-        {
-            categorie[i]=c;
-            c=fgetc(objet);
-            i++;
-        }
-        categorie[i]='\0';
-
-        i=0;
-        c=fgetc(objet);
-        while(i<100 && c!=EOF && c!='#')
-        {
-            description[i]=c;
-            c=fgetc(objet);
-            i++;
-        }
-        description[i]='\0';
-
-        if(!tous || (strstr(nomObjet,nomRch) && strstr(description,descriptionRch)))
-        {
-            sprintf(msgClient,"$%s#%s#%s#%s#%s#",idObjet,nomObjet,tmp,categorie,description);
-            c=fgetc(objet);
-            i=strlen(msgClient);//on se place à la fin de la chaine
-            while(c!=EOF && c!='$' && i<500)
+            i=26;
+            /*on recupere le prix de depart de l'objet*/
+            while(i<40 && c!=EOF && c!='#')
             {
-                msgClient[i]=c;
+                tmp[i]=c;
                 i++;
                 c=fgetc(objet);
             }
-            msgClient[i]='\0';
-            /*on recupere les informations sur le propietaire de l'objet*/
-            if(donneeUtilisateur(idPro,msgClient,"donneeObjetCatalogue")==-1)
+            tmp[i]='\0';
+            recupererInfoFichier(categorie,26,'#',&c,objet);
+            recupererInfoFichier(description,101,'#',&c,objet);
+            if(typeUtilisateur!=1 && typeUtilisateur!=2)
             {
-                return -1;
+                tous=strcmp(nomRch,"CatalogueComplet");//mot clé pour envoyer tous les objets mises en vente
+                envoyer=(strstr(nomObjet,nomRch) && strstr(description,descriptionRch) && (strstr(categorie,categorieRch)));
             }
-            /*on recupere les informations sur l'enchere de l'objet*/
-            if(donneeEnchereCatalogue(idUtili,idObjet,msgClient)==-1)
+            if(!tous || typeUtilisateur==1 || typeUtilisateur==2 || envoyer)
             {
-                return -1;
-            }
-            /* on envoie les informations au client*/
-            printf("informations: %s\n",msgClient);
-            if(EmissionBinaire(msgClient,strlen(msgClient))<=0)
-            {
-                printf("Problème emission.\n");
-                return -1;
+                sprintf(msgClient,"$%s#%s#%s#%s#%s#",idObjet,nomObjet,tmp,categorie,description);
+                i=strlen(msgClient);//on se place à la fin de la chaine
+                recupererInfoFichier(msgClient+i,500-i,'$',&c,objet);
+                /*on recupere les informations sur le propietaire de l'objet*/
+                if(donneeUtilisateur(idPro,msgClient,"donneeObjetCatalogue")==-1)
+                {
+                    fclose(objet);
+                    return -1;
+                }
+                /*on recupere les informations sur l'enchere de l'objet*/
+                donneeEnchereCatalogue(idUtilisateur,idObjet,msgClient);
+                /* on envoie les informations au client*/
+                printf("informations: %s de taille %ld.\n",msgClient,strlen(msgClient));
+                if(EmissionBinaire(msgClient,strlen(msgClient))<=0)
+                {
+                    printf("Problème emission.\n");
+                    fclose(objet);
+                    return -1;
+                }
             }
         }
         else
@@ -345,7 +323,85 @@ int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *o
             }
         }
     }
+
     return 1;
+}
+
+int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch,int f)
+{
+    int typeUtilisateur=0;
+    int retour=1;
+    char c;
+    FILE *fichier=NULL;
+
+    if(!strcmp(nomRch,"MesEncheres"))
+    {
+        typeUtilisateur=2;
+    }
+    else if(!strcmp(nomRch,"MesVentes"))
+    {
+        typeUtilisateur=1;
+    }
+
+    if(f==1)
+    {
+        fichier=fopen(FichierFinEnchere,"rb");
+    }
+    else
+    {
+        fichier=fopen(FichierEnchere,"rb");
+    }
+
+    if(fichier==NULL)
+    {
+        printf("le fichier des encheres ne s'ouvre pas.\n");
+        return -1;
+    }
+
+    c=fgetc(fichier);
+    while(c!=EOF && retour==1)
+    {
+        char idUtiTmp[6];
+        char idObjet[6];
+        int trouve=0;//bool de sortie de boucle
+        fgets(idUtiTmp,6,fichier);
+        c=fgetc(fichier);
+        fgets(idObjet,6,fichier);//identifiant de l'objet
+        if(typeUtilisateur==1 && !strcmp(idUtiTmp,idUtili))//on cherche les objets du vendeur
+        {
+            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+        }
+        else if (typeUtilisateur==2)//on cherche les objets où il a proposé une enchere
+        {
+            fseek(fichier,13,SEEK_CUR);//on # +date
+            c=fgetc(fichier);//#
+            while(c!=EOF && c!='$' && !trouve)
+            {
+                c=fgetc(fichier);
+                while(c!=EOF && c!='#')
+                {
+                    c=fgetc(fichier);
+                }
+                fgets(idUtiTmp,6,fichier);//l'identifiant
+                if(!strcmp(idUtiTmp,idUtili))
+                {
+                    retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+                }
+                c=fgetc(fichier);
+            }
+        }
+        else if(typeUtilisateur==0)
+        {
+            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+        }
+        while(c!=EOF && c!='$' && retour==1)
+        {
+            c=fgetc(fichier);
+        }
+    }
+
+    fclose(fichier);
+    return retour;
 }
 
 int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient)
@@ -733,4 +789,103 @@ void supprCaractere(char *message)
     {
         *pointeur='\0';
     }
+}
+
+
+void etatEnchere()
+{
+    FILE *enchere=NULL;
+    FILE *enchereTmp=NULL;
+    FILE *finEnchere=NULL;
+    char idPro[6];
+    char idObjet[6];
+    char dateEnchere[13];
+    char dateDebut[13];//ne sert à rien juste à respecter le format de la fonction
+    char c;
+
+    enchere=fopen(FichierEnchere,"rb");
+    if(enchere==NULL)
+    {
+        printf("Aucune enchere en cours.\n");
+        return;
+    }
+
+    enchereTmp=fopen(FichierEnchereTmp,"wb");
+    finEnchere=fopen(FichierFinEnchere,"ab");
+    if(enchereTmp==NULL || finEnchere==NULL)
+    {
+        printf("Erreur d'ouverture fichier.\n");
+        fclose(enchere);
+        //on ferme le fichier
+        if(enchereTmp) fclose(enchereTmp);
+        if(finEnchere) fclose(finEnchere);
+        return;
+    }
+
+    fgetc(enchere);
+    while(c!=EOF)
+    {
+        fgets(idPro,6,enchere);
+        fgetc(enchere);
+        fgets(idObjet,6,enchere);
+        fgetc(enchere);
+        fgets(dateEnchere,13,enchere);
+        if(testDateMiseEnVente(dateEnchere,13,dateDebut,13))//si date positive on ecrit dans fichier enchereTmp
+        {
+            fprintf(enchereTmp,"$%s#%s#%s",idPro,idObjet,dateEnchere);
+            c=fgetc(enchere);
+            while(c!='$' && c!=EOF)
+            {
+                fputc(c,enchereTmp);
+                c=fgetc(enchere);
+            }
+        }
+        else
+        {
+            fprintf(finEnchere,"$%s#%s#%s",idPro,idObjet,dateEnchere);
+            c=fgetc(enchere);
+            while(c!='$' && c!=EOF)
+            {
+                fputc(c,finEnchere);
+                c=fgetc(enchere);
+            }
+        }
+    }
+    fclose(enchere);
+    fclose(enchereTmp);
+    fclose(finEnchere);
+    rename(FichierEnchereTmp,FichierEnchere);
+    return;
+}
+
+
+int informationFinEnchere(char *message,int taille)
+{
+    char idUti[6];
+    int retour=0;
+    retour=extraireIdClient(&message,taille,idUti);
+     if(retour==-1)
+    {
+        printf("problème d'ouverture fichier user.txt\n");
+        return -1;
+    }
+    else if (retour==0)
+    {
+        printf("l'identifiant utilisateur est inconnu.\n");
+        return 0;
+    }
+
+    FILE *finEnchere=NULL;
+    finEnchere=fopen(FichierFinEnchere,"rb");
+    if(finEnchere==NULL)
+    {
+        printf("Aucune enchere n'est terminée.\n");
+        return 0;
+    }
+
+    rechercherObjet(idUti,"MesVentes","","",1);
+    rechercherObjet(idUti,"MesEncheres","","",1);
+
+    fclose(finEnchere);
+    return 1;
 }

@@ -36,12 +36,59 @@ int miseAuEnchere(char *idUti,char *idObj,char *message,int tailleMsg);
 
 /**
 \fn int consulter(char *msg,int tailleMsg)
-\brief envoie les objets au client qui correspondent au nom et à la description
+\brief fonction qui gère les messages de type "consulter"
 \param[in] msg le message envoyé par l'utilisateur
 \param[in] tailleMsg taille du message
 \return -1 si erreur fichier, 0 si message non conforme, 1 sinon
 */
 int consulter(char *msg,int tailleMsg);
+
+/**
+\fn int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch)
+\param[in] idUtili pointeur vers une chaine, identifiant de l'utilisateur
+\param[in] nomRch le nom de l'objet que l'on recherche
+\param[in] categorieRch la categorie d'objet que l'on recherche
+\param[in] descriptionRch la description de l'objet que l'on recherche
+\param[in] f bool 1 ou 0 pour ouvrir le bon fichier, 1 pour finEnchere ou 0 pour enchere
+\return 0 si le message n'est pas conforme, -1 si erreur fichier, 1 sinon
+*/
+int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch,int f);
+
+/**
+\fn int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch)
+\brief cherche les données de l'objet à envoyer au client, puis les données du propietaire et les données des encheres
+\param[in] idPro l'identifiant du propietaire de l'objet
+\param[in] idUtilisateur identifiant de l'utilisateur
+\param[in] typeUtilisateur 1 si l'utilisateur est vendeur et 2 si acheteur
+\param[in] nomRch le nom de l'objet que l'on recherche
+\param[in] categorieRch la categorie d'objet que l'on recherche
+\param[in] descriptionRch la description de l'objet que l'on recherche
+\return 0 si le message n'est pas conforme, -1 si erreur fichier, 1 sinon
+*/
+int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch);
+
+/**
+\fn void extraireDonneeMsg(char *message,int tailleMsg,char* rchr,char tailleRchr,int *i,char separateur)
+\brief extrait les données du message vers une chaine jusuq'à lire le separateur
+\param[in] message pointeur vers une chaine d'où on extrait l'information
+\param[in] tailleMsg taille du message
+\param[out] rchr retourne l'information désirée
+\param[in] tailleRchr taille de la chaine rchr
+\param[in][out] i pointeur vers un entier
+\param[in] separateur le separateur qui termine la lecture du message
+*/
+void extraireDonneeMsg(char *message,int tailleMsg,char* rchr,char tailleRchr,int *i,char separateur);
+
+/**
+\fn void recupererInfoFichier(char *chaine,int taille,char separateur,char *c,FILE *file);
+\brief extrait les données d'un fichier dans une chaine de caractère jusqu'à lire un separateur
+\param[out] chaine pointeur vers une chaine
+\param[in] taille taille de la chaine
+\param[in] separateur le separateur qui termine la lecture du message
+\param[in][out] c pointeur vers un caractère, permet de connaitre le dernier caractère lu
+\param[in] file pointeur vers un fichier
+*/
+void recupererInfoFichier(char *chaine,int taille,char separateur,char *c,FILE *file);
 
 /**
 \fn int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enchere)
@@ -114,17 +161,6 @@ int testDateMiseEnVente(char *message,int tailleMsg,char *dateDebut,int tailleDa
 */
 void supprCaractere(char *message);
 
-/**
-\fn int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *objet)
-\brief rechercher les differentes informations des objets disponibles à la vente qui correspondent au nom et la description
-        données par l'utilisateur. Envoie les données au client.
-\param[in] idUtili l'identifiant de l'utilisateur
-\param[in] nomRch le nom des objets à rechercher
-\param[in] descriptionRch la descriptions des objets à rechercher
-\param[in] objet le fichier qui contient les informations sur les objets en vente
-\return -1 si probleme fichier, 1 sinon
-*/
-int donneeObjetCatalogue(char* idUtili,char *nomRch,char *descriptionRch,FILE *objet);
 
 /**
 \fn int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient)
@@ -145,5 +181,14 @@ int donneeEnchereCatalogue(char* idUtili,char *idObjet,char *msgClient);
 \return 1
 */
 int nbrVenteEnchereUtilisateur(char *idUtilisateur,char *msgClient);
+
+/**
+void etatEnchere()
+\brief scan le fichier enchere, controle la date des encheres, ecrit dans le fichier finEnchere.txt les encheres terminées
+*/
+void etatEnchere();
+
+
+int informationFinEnchere(char *message,int taille);
 
 #endif // OBJET_H_INCLUDED

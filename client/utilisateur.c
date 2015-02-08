@@ -120,7 +120,7 @@ int creationDeCompte()
     while(!infoOk);
 
     sprintf(creerCpt,"creerCpt#%s#%s",mdp1,nomPrenom);
-   infoOk=0;
+    infoOk=0;
     while(!infoOk)
     {
         printf("Date de naissance (jj/mm/aaaa): ");
@@ -266,9 +266,13 @@ int vendre(char * idUser)
     do
     {
         printf("Entrez un prix de départ pour l'objet que vous voulez mettre en vente.\n");
-        printf("(tous objets ne peut depasser un prix de 100 000€).\n");
+        printf("(le prix maximum d'une enchere sur le site ne peut pas dépasser 100 000€).\n");
         printf("prix: ");
-        scanf("%f",&prix);
+        if((scanf("%f",&prix))!=1)
+        {
+            printf("Le prix n'est pas conforme.\n");
+            prix=-1;
+        }
         viderBuffer();
     }
     while(prix<0 || prix >= 100000);
@@ -313,9 +317,12 @@ int vendre(char * idUser)
 
     do
     {
-        printf("Entrez une quantité (>0).\n");
+        printf("Entrez une quantité (0<<100).\n");
         printf("quantité: ");
-        scanf("%d",&quantite);
+        if((scanf("%d",&quantite))!=1)
+        {
+            quantite=-1;
+        }
         viderBuffer();
     }
     while(quantite<0 || quantite>99);
@@ -362,48 +369,86 @@ int vendre(char * idUser)
     return infoOk;
 }
 
-
-int rechercheObjet(char *idUser)
+int menuRechercherObjet(char *idUser)
 {
-    char consulter[144];//tailles maximum du messages consulter
+    char choix[2];
+    printf("***Rechercher produit disponible à la vente***\n");
+    printf("1) Envoyer le catalogue complet.\n");
+    printf("2) Rechercher un produit disponible à la vente par nom, categorie, description.\n");
+    printf("3) Rechercher les produits où vous avez effectué une enchère.\n");
+    printf("4) Rechercher les produits que vous avez mis en vente.\n");
+    printf("0) Quitter\n");
+    printf("choix: ");
+    fgets(choix,2,stdin);
+    supprCara(choix);
+    if(choix[0]!='0')
+    {
+        return rechercheObjet(idUser,choix);
+    }
+
+    return 2;//juste retour menu
+}
+int rechercheObjet(char *idUser,char *choix)
+{
+    char consulter[170];//tailles maximum du messages consulter
     char nom[26];
     char description[101];
+    char categorie[26];
     int infoOk=0;
 
     nom[0]='\0';
     description[0]='\0';
+    categorie[0]='\0';
 
-    printf("entrez un nom de produit à rechercher [26 caractères maximum]:\n");
-    printf("(si aucun nom n'est rentré tous les produits disponibles sur le site vous seront envoyés.)\n");
-
-    do
+    switch(choix[0])
     {
-        printf("nom: ");
-        fgets(nom,26,stdin);
-        supprCara(nom);
-        infoOk=controleChaine(nom,"recherche");
-    }
-    while(!infoOk);
+    case '1':
+        strcpy(nom,"CatalogueComplet");
+        break;
+    case '3':
+        strcpy(nom,"MesEncheres");
+        break;
+    case '4':
+        strcpy(nom,"MesVentes");
+        break;
+    case '2':
+        printf("entrez un nom de produit à rechercher [26 caractères maximum]:\n");
 
-    if(strlen(nom)==0) strcpy(nom,"tous");//si rien n'est rentré par l'utilisateur
+        do
+        {
+            printf("nom: ");
+            fgets(nom,26,stdin);
+            supprCara(nom);
+            infoOk=controleChaine(nom,"recherche");
+        }
+        while(!infoOk);
 
-    /*si l'utilisateur entre un nom, on lui propose de rentrer une description*/
-    if(strcmp(nom,"tous"))
-    {
+        printf("entrez une categorie de produit à rechercher [25 caractères maximum]:\n");
+        do
+        {
+            printf("categorie: ");
+            fgets(categorie,26,stdin);
+            supprCara(categorie);
+            infoOk=controleChaine(categorie,"recherche");
+        }
+        while(!infoOk);
+
         printf("entrez une description de produit à rechercher [100 caractères maximum]:\n");
-        printf("(tapez entrée si aucune description.)\n");
-
         do
         {
             printf("description: ");
             fgets(description,101,stdin);
             supprCara(description);
-            controleChaine(description,"recherche");
+            infoOk=controleChaine(description,"recherche");
         }
         while(!infoOk);
+        break;
+        default:
+        return 0;
     }
 
-    sprintf(consulter,"consulter#%s#%s#%s\n",idUser,nom,description);
+    sprintf(consulter,"consulter#%s#%s#%s#%s\n",idUser,nom,categorie,description);
+
     if(EmissionBinaire(consulter,strlen(consulter))<=0)
     {
         return -1;//on retourne une erreur serveur
@@ -428,10 +473,13 @@ void enchere(char *idUtilisateur,char *idObjet)
     do
     {
         printf("prix: ");
-        scanf("%f",&prix);
+        if((scanf("%f",&prix))!=1)
+        {
+            prix=-1;
+        }
         viderBuffer();
     }
-    while(prix<=0 && prix>=100000);
+    while(prix<=0 || prix>=100000);
 
     sprintf(acheter,"acheter#%s#%s#%5.2f\n",idUtilisateur,idObjet,prix);
 
@@ -535,11 +583,19 @@ int informationCompte(char *idUser)
         infoOk=-1;//erreur serveur
     }
 
-    else if(msgRetour!=NULL){
+    else if(msgRetour!=NULL)
+    {
         infoOk=1;
         afficherUtilisateur(msgRetour,strlen(msgRetour));
     }
 
     free(msgRetour);
     return infoOk;
+}
+
+
+int voirVente(char *idUtilisateur){
+    char finEnchere[18];
+    sprintf(finEnchere,"finEnchere#%s\n",idUtilisateur);
+    return 1;
 }

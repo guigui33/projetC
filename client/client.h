@@ -47,15 +47,13 @@ void Terminaison();
 
 /**
 \fn void menuConnex()
-\brief fonction permettant d'afficher le menu, l'utilisateur fait sont choix de se connecter, de quitter ou de creer un compte
+\brief fonction permettant d'afficher le menu de connexion
 */
 void menuConnex();
 
 /**
 \fn void menuUtilisateur();
-\brief fonction pemettant d'afficher a l'utilisateur le choix entre la vente ou la consultation d'objet. 1 pour la consultation 2 pour la vente 0 pour Quitter
-\param
-\return
+\brief fonction pemettant d'afficher à l'utilisateur de naviguer dans le programme
 */
 void menuUtilisateur();
 

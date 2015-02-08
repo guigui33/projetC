@@ -236,7 +236,7 @@ void afficherObjet(FILE *file,char *idObjet,int choix,int *finFichier)
         float prixDepart=0;
         struct tm tempsDepart;
         struct tm tempsFin;
-        fgets(idObjet,6,file);//on initialise l'identifiant de l'objet si l'utilisteur veut achter le produit
+        fgets(idObjet,6,file);//on initialise l'identifiant de l'objet si l'utilisteur veut acheter le produit
         fgetc(file);
         afficherInformation("\t",'#',file,&c);
         fgets(dateDeb,13,file);//date de debut de l'enchere
@@ -302,6 +302,12 @@ void afficherInformation(char *chaine,char separateur,FILE *file,char *c)
 
 void afficherInformation2(char *chaine,char *information,int taille,char separateur,int *i)
 {
+   if(!strcmp("\nDate de naissance: ",chaine)){
+        printf("%s",chaine);
+        printf("%.2s/%.2s/%.4s",information+*i,information+*i+2,information+*i+4);
+        *i=*i+9;
+        return;
+    }
     printf("%s",chaine);
     while(*i<taille && information[*i]!=separateur)
     {
@@ -335,7 +341,7 @@ void afficherUtilisateur(char *chaine,int taille)
     afficherInformation2("\nMail: ",chaine,taille,'#',&i);
     afficherInformation2("\nAdresse: ",chaine,taille,'#',&i);
     afficherInformation2("\nVille: ",chaine,taille,'#',&i);
-    afficherInformation2("\t",chaine,taille,'#',&i);
+    afficherInformation2("\tCode postal:",chaine,taille,'#',&i);
     afficherInformation2("\nAchat: ",chaine,taille,'#',&i);
     afficherInformation2("\tVente: ",chaine,taille,'#',&i);
     afficherInformation2("\nEnchere en cours: ",chaine,taille,'#',&i);

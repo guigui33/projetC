@@ -15,16 +15,18 @@ int main()
 
     while(1)
     {
-        char typeRequete[10];//variable pour connaitre le type de requète
+        char typeRequete[11];//variable pour connaitre le type de requète
         int retour=0; //variable d'aide pour les retours de fonction
         int fin=0;
         char messageRetour[100]; //message retour
         char *donnee=NULL; //pointeur sur le message où commence les donnees
-
+        etatEnchere();
         AttenteClient();
 
         while(!fin)
         {
+            printf("***etat des encheres***\n");
+
             message = Reception();
 
             printf("J'ai recu %s\n",message);
@@ -112,6 +114,11 @@ int main()
                     {
                         sprintf(messageRetour,"%s","erreurEnvoieInfo");
                     }
+                }
+                else if(!strncmp(typeRequete,"finEnchere",10))//a faire
+                {
+                    retour=informationFinEnchere(donnee,strlen(donnee));
+
                 }
                 else
                 {

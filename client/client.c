@@ -366,7 +366,7 @@ void menuUtilisateur(char * idUser)
     while(!fin)
     {
         printf("-------Menu Utilisateur-------\n");
-        printf("1)Rechercher produits\n2)Vendre un produit\n3)Compte\n0)Quitter\n");
+        printf("1)Rechercher produits\n2)Vendre un produit\n3)Compte\n4)Vos Ventes terminée\n0)Quitter\n");
         printf("choix: ");
 
         if(fgets(choix,2,stdin)==NULL)
@@ -379,7 +379,7 @@ void menuUtilisateur(char * idUser)
         switch(choix[0])
         {
         case '1':
-            retour=rechercheObjet(idUser);
+            retour=menuRechercherObjet(idUser);
             if(retour==1)
             {
                 printf("Chargement catalogue...\n");
@@ -391,6 +391,9 @@ void menuUtilisateur(char * idUser)
             else if(retour==0)
             {
                 printf("Le catalogue n'a pu être envoyé, les données envoyées ne sont pas correctes.\n");
+            }
+            else if(retour==2){
+                printf("Retour menu.......\n");
             }
             else
             {
@@ -426,6 +429,9 @@ void menuUtilisateur(char * idUser)
             {
                 printf("Suite à un problème serveur, nous ne pouvons transmettre les données du compte.\n");
             }
+            break;
+        case '4':
+            voirVente(idUser);
             break;
         case '0':
             printf("Retour Menu Connexion...\n");

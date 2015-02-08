@@ -25,13 +25,22 @@ int creationDeCompte();
 int vendre(char * idUser);
 
 /**
-\fn int rechercheObjet(char *idUser)
+\fn int rechercheObjet(char *idUser,char *choix)
 \brief demande à l'utilisateur de rechercher un produit, envoie sa demande au serveur, la reponse du serveur est enregistrée
         dans un fichier temporaire
 \param[in] idUser l'identifiant de l'utilisateur
+\param[in] choix pointeur sur un caractère pour connaitre le choix de l'utilisateur
 \return -1 en cas d'erreur du serveur, 0 si le message envoyé n'est pas correct, 1 sinon
 */
-int rechercheObjet(char *idUser);
+int rechercheObjet(char *idUser,char *choix);
+
+/**
+\fn int menuRechercherObjet(char *idUser);
+\brief demande à l'utilisateur quel typde de recherche il souhaite effectuer.
+\param[in] idUser l'identifiant de l'utilisateur
+\return -1 en cas d'erreur du serveur, 0 si le message envoyé n'est pas correct, 1 sinon
+*/
+int menuRechercherObjet(char *idUser);
 
 /**
 \fn void enchere(char *idUtilisateur,char *idObjet)
