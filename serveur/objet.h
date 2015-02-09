@@ -49,10 +49,9 @@ int consulter(char *msg,int tailleMsg);
 \param[in] nomRch le nom de l'objet que l'on recherche
 \param[in] categorieRch la categorie d'objet que l'on recherche
 \param[in] descriptionRch la description de l'objet que l'on recherche
-\param[in] f bool 1 ou 0 pour ouvrir le bon fichier, 1 pour finEnchere ou 0 pour enchere
 \return 0 si le message n'est pas conforme, -1 si erreur fichier, 1 sinon
 */
-int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch,int f);
+int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch);
 
 /**
 \fn int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch)
@@ -63,9 +62,10 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
 \param[in] nomRch le nom de l'objet que l'on recherche
 \param[in] categorieRch la categorie d'objet que l'on recherche
 \param[in] descriptionRch la description de l'objet que l'on recherche
+\param[in] f entier qui indique quels types de données envoyer
 \return 0 si le message n'est pas conforme, -1 si erreur fichier, 1 sinon
 */
-int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch);
+int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch,int f);
 
 /**
 \fn void extraireDonneeMsg(char *message,int tailleMsg,char* rchr,char tailleRchr,int *i,char separateur)
@@ -188,7 +188,14 @@ void etatEnchere()
 */
 void etatEnchere();
 
-
+/**
+\fn int informationFinEnchere(char *message,int taille)
+\brief lit le fichier finEnchere.txt, retourne les informations sur le produit et l'utilistauer qui a remporté
+        l'enchere au vendeur.
+\param[in] message le message envoyé par l'utilisateur
+\param[in] taille taille du message
+\return 0 si aucune enchere terminée et 1 s'il a envoyé les objets au vendeur
+*/
 int informationFinEnchere(char *message,int taille);
 
 #endif // OBJET_H_INCLUDED

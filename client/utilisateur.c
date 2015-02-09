@@ -509,7 +509,7 @@ void enchere(char *idUtilisateur,char *idObjet)
 }
 
 
-int catalogue(char *idUtilisateur)
+int catalogue(char *idUtilisateur,int f)
 {
     size_t fin=0;//boolean de fin
     int choix=3;//recupere le choix de l'utilisateur
@@ -528,8 +528,14 @@ int catalogue(char *idUtilisateur)
     {
         if(produit!=-1)
         {
+            if(f==0){
             printf("-------Catalogue-------\n");
             afficherObjet(tmp,idObjet,produit,&finFichier);
+            }
+            else if(f==1){
+                printf("-------Mes Ventes Terminées-------\n");
+                afficherMesVentesTerminee(tmp,produit,&finFichier);
+            }
             printf("0)Quitter\n");
         }
         printf("Choix: ");
@@ -594,8 +600,18 @@ int informationCompte(char *idUser)
 }
 
 
-int voirVente(char *idUtilisateur){
+int voirVenteFinie(char *idUtilisateur){
     char finEnchere[18];
-    sprintf(finEnchere,"finEnchere#%s\n",idUtilisateur);
-    return 1;
+    int infoOk=0;
+
+    sprintf(finEnchere,"finVentes#%s\n",idUtilisateur);
+
+    if(EmissionBinaire(finEnchere,strlen(finEnchere))<0){
+        printf("erreur d'emission.\n");
+        return -1;
+    }
+
+    infoOk=enregistrementCatalogueTemp();
+
+    return infoOk;
 }

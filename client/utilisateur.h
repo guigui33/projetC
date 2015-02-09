@@ -51,12 +51,13 @@ int menuRechercherObjet(char *idUser);
 void enchere(char *idUtilisateur,char *idObjet);
 
 /**
-\fn int catalogue(char *idUtilisateur)
+\fn int catalogue(char *idUtilisateur,int f)
 \brief l'utilisateur accède au catalogue et choisit les actions qu'il veut faire
 \param[in] idUtilisateur l'identifiant de l'utilisateur
+\param[in] f type de fonction
 \return -1 si erreur fichier, 1 sinon
 */
-int catalogue(char *idUtilisateur);
+int catalogue(char *idUtilisateur,int f);
 
 /**
 \fn int informationCompte(char *idUser);
@@ -65,5 +66,13 @@ int catalogue(char *idUtilisateur);
 \return -1 si erreur fichier, 0 en cas d'erreur message, 1 sinon
 */
 int informationCompte(char *idUser);
+
+/**
+\fn int voirVenteFinie(char *idUtilisateur);
+\brief l'utilisateur demande les objets, mise en vente par lui meme, dont l'enchère est terminée
+\param[in] idUtilisateur l'identifiant de l'utilisateur
+\return -1 si erreur fichier, 0 en cas d'erreur message, 1 sinon
+*/
+int voirVenteFinie(char *idUtilisateur);
 
 #endif // UTILISATEUR_H_INCLUDED

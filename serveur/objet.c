@@ -237,12 +237,12 @@ int consulter(char *message,int tailleMsg)
     extraireDonneeMsg(message,tailleMsg,categorieRch,26,&i,'#');
     extraireDonneeMsg(message,tailleMsg,descriptionRch,101,&i,'\n');
 
-    retour=rechercherObjet(idUti,nomRch,categorieRch,descriptionRch,0);//on va recuperer les donnees à envoyer au client dans les differents fichiers
+    retour=rechercherObjet(idUti,nomRch,categorieRch,descriptionRch);//on va recuperer les donnees à envoyer au client dans les differents fichiers
 
     return retour;//retourne 1 si ok, -1 sinon
 }
 
-int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch)
+int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateur,char *nomRch,char *categorieRch,char *descriptionRch,int f)
 {
     FILE *objet=NULL;
     char c;
@@ -253,7 +253,6 @@ int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateu
     char description[100];//description de l'objet
     char categorie[26];//categorie de l'objet sur 25 caracteres
     int trouve=0;
-
     objet=fopen(FichierObjetEnVente,"rb");
     if(objet==NULL)
     {
@@ -297,14 +296,21 @@ int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateu
                 i=strlen(msgClient);//on se place à la fin de la chaine
                 recupererInfoFichier(msgClient+i,500-i,'$',&c,objet);
                 /*on recupere les informations sur le propietaire de l'objet*/
-                if(donneeUtilisateur(idPro,msgClient,"donneeObjetCatalogue")==-1)
+                if(f==0)//si f!=0 on n'envoie pas les données utilisateurs et enchere catalogue
                 {
-                    fclose(objet);
-                    return -1;
+                    if(donneeUtilisateur(idPro,msgClient,"donneeObjetCatalogue")==-1)
+                    {
+                        fclose(objet);
+                        return -1;
+                    }
+                    /*on recupere les informations sur l'enchere de l'objet*/
+                    donneeEnchereCatalogue(idUtilisateur,idObjet,msgClient);
+                    /* on envoie les informations au client*/
                 }
-                /*on recupere les informations sur l'enchere de l'objet*/
-                donneeEnchereCatalogue(idUtilisateur,idObjet,msgClient);
-                /* on envoie les informations au client*/
+                if(f==1)
+                {
+                    strcat(msgClient,"\n");
+                }
                 printf("informations: %s de taille %ld.\n",msgClient,strlen(msgClient));
                 if(EmissionBinaire(msgClient,strlen(msgClient))<=0)
                 {
@@ -327,7 +333,7 @@ int donneeObjet(char *idPro,char *idObjet,char *idUtilisateur,int typeUtilisateu
     return 1;
 }
 
-int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch,int f)
+int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descriptionRch)
 {
     int typeUtilisateur=0;
     int retour=1;
@@ -343,14 +349,7 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
         typeUtilisateur=1;
     }
 
-    if(f==1)
-    {
-        fichier=fopen(FichierFinEnchere,"rb");
-    }
-    else
-    {
-        fichier=fopen(FichierEnchere,"rb");
-    }
+    fichier=fopen(FichierEnchere,"rb");
 
     if(fichier==NULL)
     {
@@ -369,7 +368,7 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
         fgets(idObjet,6,fichier);//identifiant de l'objet
         if(typeUtilisateur==1 && !strcmp(idUtiTmp,idUtili))//on cherche les objets du vendeur
         {
-            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
         }
         else if (typeUtilisateur==2)//on cherche les objets où il a proposé une enchere
         {
@@ -385,14 +384,14 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
                 fgets(idUtiTmp,6,fichier);//l'identifiant
                 if(!strcmp(idUtiTmp,idUtili))
                 {
-                    retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+                    retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
                 }
                 c=fgetc(fichier);
             }
         }
         else if(typeUtilisateur==0)
         {
-            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch);
+            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
         }
         while(c!=EOF && c!='$' && retour==1)
         {
@@ -842,13 +841,25 @@ void etatEnchere()
         }
         else
         {
-            fprintf(finEnchere,"$%s#%s#%s",idPro,idObjet,dateEnchere);
+            float prix=0;
+            char idAcheteur[6];//identifiant de l'acheteur
+            c=fgetc(finEnchere);
+            fscanf(finEnchere,"%f",&prix);
+            fprintf(finEnchere,"$%s#%s#%s#%5.2f",idPro,idObjet,dateEnchere,prix);
             c=fgetc(enchere);
-            while(c!='$' && c!=EOF)
+            if(c!=EOF && c!='$')//si # cela veut dir acheteur
             {
-                fputc(c,finEnchere);
+                fgets(idAcheteur,6,finEnchere);//on recupère id
+                incrementerNbrObjet(idAcheteur,idPro);//on increment le nbr d'achat vendeur acheteur.
+                fprintf(finEnchere,"#%s",idAcheteur);
                 c=fgetc(enchere);
+                while(c!='$' && c!=EOF)
+                {
+                    fputc(c,finEnchere);
+                    c=fgetc(enchere);
+                }
             }
+
         }
     }
     fclose(enchere);
@@ -863,8 +874,12 @@ int informationFinEnchere(char *message,int taille)
 {
     char idUti[6];
     int retour=0;
+    char c;
+    char idComp[6];//id utilisateur qui est récupéré dans le fichier
+    char msgServeur[30];
+
     retour=extraireIdClient(&message,taille,idUti);
-     if(retour==-1)
+    if(retour==-1)
     {
         printf("problème d'ouverture fichier user.txt\n");
         return -1;
@@ -882,10 +897,46 @@ int informationFinEnchere(char *message,int taille)
         printf("Aucune enchere n'est terminée.\n");
         return 0;
     }
-
-    rechercherObjet(idUti,"MesVentes","","",1);
-    rechercherObjet(idUti,"MesEncheres","","",1);
+    c=fgetc(finEnchere);
+    while(c!=EOF && retour==1)
+    {
+        fgets(idComp,6,finEnchere);//identifiant du vendeur
+        c=fgetc(finEnchere);
+        if(!strcmp(idComp,idUti))
+        {
+            char idObjet[6];//recupere l'identifiant de l'objet
+            char idAcheteur[6];
+            float prixFinal=0;
+            fgets(idObjet,6,finEnchere);
+            if(donneeObjet(idUti,idObjet,idUti,1,"MesVentes","","",1)!=1) //envoie au client les données objets
+            {
+                printf("Probleme dans l'envoie des données objets.\n");
+                retour=-1;//retourne une erreur serveur
+            }
+            else
+            {
+                fseek(finEnchere,14,SEEK_CUR);
+                fscanf(finEnchere,"%f",&prixFinal);
+                c=fgetc(finEnchere);//# ou $
+                sprintf(msgServeur,"#%5.2f\n",prixFinal);
+                printf("informations: %s",msgServeur);
+                EmissionBinaire(msgServeur,strlen(msgServeur));
+                if(c!=EOF && c!='$' && c!='\n')
+                {
+                    char msgTmp[8];
+                    fgets(idAcheteur,6,finEnchere);//recupere l'id acheteur
+                    sprintf(msgTmp,"%s\n",idAcheteur);//formatage util pour la fonction informationUtilisateur
+                    if(informationUtilisateur(msgTmp,strlen(msgTmp),1)<0)//envoie les données sur l'utilisateur
+                        retour=-1;//erreur serveur;
+                }
+            }
+        }
+        while(c!=EOF && c!='$')
+        {
+            c=fgetc(finEnchere);
+        }
+    }
 
     fclose(finEnchere);
-    return 1;
+    return retour;
 }

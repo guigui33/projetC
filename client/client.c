@@ -383,7 +383,7 @@ void menuUtilisateur(char * idUser)
             if(retour==1)
             {
                 printf("Chargement catalogue...\n");
-                if(catalogue(idUser)==-1)
+                if(catalogue(idUser,0)==-1)
                 {
                     printf("le catalogue n'a pu etre ouvert.\n");
                 }
@@ -392,7 +392,8 @@ void menuUtilisateur(char * idUser)
             {
                 printf("Le catalogue n'a pu être envoyé, les données envoyées ne sont pas correctes.\n");
             }
-            else if(retour==2){
+            else if(retour==2)
+            {
                 printf("Retour menu.......\n");
             }
             else
@@ -419,11 +420,11 @@ void menuUtilisateur(char * idUser)
             retour=informationCompte(idUser);
             if(retour==1)
             {
-                printf(".......\n");
+                printf(".......\n\n");
             }
             else if(retour==0)
             {
-                printf("Les informations du compte ne sont pas disponible.\n");
+                printf("Les informations du compte ne sont pas disponibles.\n");
             }
             else
             {
@@ -431,14 +432,34 @@ void menuUtilisateur(char * idUser)
             }
             break;
         case '4':
-            voirVente(idUser);
+            retour=voirVenteFinie(idUser);
+            if(retour==1)
+            {
+                printf("Chargement catalogue...\n");
+                if(catalogue(idUser,1)==-1)
+                {
+                    printf("le catalogue n'a pu etre ouvert.\n");
+                }
+            }
+            else if(retour==0)
+            {
+                printf("Le catalogue n'a pu être envoyé, les données envoyées ne sont pas correctes.\n");
+            }
+            else if(retour==2)
+            {
+                printf("Retour menu.......\n");
+            }
+            else
+            {
+                printf("Le catalogue n'a pu être envoyé, problème serveur.\n");
+            }
             break;
         case '0':
             printf("Retour Menu Connexion...\n");
             fin=1;
             break;
         default:
-            printf("erreur dans le choix, recommencez.\n");
+            printf("Erreur dans le choix, recommencez.\n");
             break;
         }
     }

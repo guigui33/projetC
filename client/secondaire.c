@@ -262,7 +262,7 @@ void afficherObjet(FILE *file,char *idObjet,int choix,int *finFichier)
         afficherInformation("\t-Votre Enchere: ",'#',file,&c);
         afficherInformation("€\n-Nombre d'enchère: ",'$',file,&c);
         strftime(dateFin,20, "%d/%m/%Y à %H:%M",&tempsFin);//ecrit dans une chaine au format desiré
-        printf("\n-Fin des encheres: %s.",dateFin);//format date plus afficher compteur de date
+        printf("\n-Fin des encheres: %s ",dateFin);//format date plus afficher compteur de date
         fin=1;
         printf("\n\n1)Precedent 2)Acheter ");
         if(c!=EOF)
@@ -302,7 +302,8 @@ void afficherInformation(char *chaine,char separateur,FILE *file,char *c)
 
 void afficherInformation2(char *chaine,char *information,int taille,char separateur,int *i)
 {
-   if(!strcmp("\nDate de naissance: ",chaine)){
+    if(!strcmp("\nDate de naissance: ",chaine))
+    {
         printf("%s",chaine);
         printf("%.2s/%.2s/%.4s",information+*i,information+*i+2,information+*i+4);
         *i=*i+9;
@@ -350,4 +351,90 @@ void afficherUtilisateur(char *chaine,int taille)
 
     free(msgServeur);
     return;
+}
+
+void afficherMesVentesTerminee(FILE *file,int choix,int *finFichier)
+{
+    char c;
+    int fin=0;
+    c=fgetc(file);
+
+    if(choix!=2)
+    {
+        int compteur=0;
+        fseek(file,-2,SEEK_CUR);//on recule de 2octets
+        c=fgetc(file);
+        while(c!=EOF && compteur!=(choix+1) && ftell(file)!=0)
+        {
+            fseek(file,-2,SEEK_CUR);
+            c=fgetc(file);
+            if(c=='$') compteur++;
+        }
+    }
+
+    if(c==EOF)//si fichier vide
+    {
+        printf("\nAucune de vos ventes n'est terminée.\n\n");
+        *finFichier=-1;//signal fichier vide
+        return ;
+    }
+
+    while(c!=EOF && !fin)
+    {
+        char dateDeb[20];
+        char dateFin[20];
+        float prixDepart=0;
+        float prixFin=0;
+        struct tm tempsDepart;
+        struct tm tempsFin;
+        fseek(file,6,SEEK_CUR);//on passe l'id objet #
+        afficherInformation("\t",'#',file,&c);
+        fgets(dateDeb,13,file);//date de debut de l'enchere
+        formatDate(dateDeb,&tempsDepart);
+        fgetc(file);//on passe le #
+        fgets(dateFin,13,file);//date de fin de l'enchere
+        formatDate(dateFin,&tempsFin);
+        fgetc(file);//on passe le #
+        fscanf(file,"%f",&prixDepart);//prix de depart de l'enchere
+        fgetc(file);//on passe le #
+        afficherInformation("\nCatégorie: ",'#',file,&c);
+        afficherInformation("\nDecription: ",'#',file,&c);
+        afficherInformation("\nURL: ",'#',file,&c);
+        afficherInformation("\nQuantité: ",'#',file,&c);
+        afficherInformation("\nVille: ",'#',file,&c);
+        strftime(dateDeb,20, "%d/%m/%Y à %H:%M",&tempsDepart);//ecrit dans une chaine au format desiré
+        printf("\nMise en vente le %s au prix de %5.2f€.",dateDeb,prixDepart);
+        fscanf(file,"%f",&prixFin);
+        c=fgetc(file);
+        if(c!=EOF && c!='$')//il y a un achteur
+        {
+            printf("\n\n***Information Acheteur***\n");
+            afficherInformation("\nNom: ",'#',file,&c);
+            afficherInformation("\tPrenom: ",'#',file,&c);
+            afficherInformation("\nDate de naissance: ",'#',file,&c);
+            afficherInformation("\nTéléphone: ",'#',file,&c);
+            afficherInformation("\nMail: ",'#',file,&c);
+            afficherInformation("\nAdresse: ",'#',file,&c);
+            afficherInformation("\nVille: ",'#',file,&c);
+            afficherInformation("\tCode postal:",'#',file,&c);
+            afficherInformation("\nAchat: ",'#',file,&c);
+            afficherInformation("\tVente: ",'$',file,&c);
+            strftime(dateFin,20, "%d/%m/%Y à %H:%M",&tempsFin);
+            printf("\n\nVotre produit a été vendu au prix de %5.2f le %s.\n",prixFin,dateFin);
+        }
+        else
+        {
+            printf("\nIl n'a aucun acheteur pour votre produit.\n");
+        }
+        fin=1;
+        printf("\n\n1)Precedent ");
+        if(c!=EOF)
+        {
+            printf("3)Suivant ");
+            *finFichier=0;
+        }
+        else
+            *finFichier=1;
+        fseek(file,-1,SEEK_CUR);// recule le curseur de 1 octet
+    }
 }

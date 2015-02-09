@@ -308,7 +308,8 @@ int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
             c=fgetc(user);
             while(c!=EOF && c!='$')
             {
-                fprintf(newUser,"%c",c);
+                if(c!='\n')
+                    fprintf(newUser,"%c",c);
                 c=fgetc(user);
             }
         }
@@ -320,7 +321,8 @@ int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
             while(c!=EOF && c!='$')
             {
                 if(c=='#') cpt++;
-                fprintf(newUser,"%c",c);
+                if(c!='\n')
+                    fprintf(newUser,"%c",c);
                 if(cpt==indice)
                 {
                     fscanf(user,"%d",&nbr);
@@ -417,11 +419,17 @@ int donneeUtilisateur(char *idPro,char *msgClient,char *fonction)
     return 1;
 }
 
-int informationUtilisateur(char *message,int tailleMsg)
+int informationUtilisateur(char *message,int tailleMsg,int f)
 {
     char idUtilisateur[6];
     int retour=0;
-    char msgClient[500]="$";//le pire cas 500 caractères
+    char msgClient[500];//le pire cas 500 caractères
+
+    if(f==0){
+        strcpy(msgClient,"$");
+    }
+    else
+        strcpy(msgClient,"");//suite de données à envoyer
 
     retour=extraireIdClient(&message,tailleMsg,idUtilisateur);
     if(retour==-1)
@@ -434,15 +442,21 @@ int informationUtilisateur(char *message,int tailleMsg)
         printf("l'identifiant utilisateur est inconnu\n");
         return 0;
     }
-
-    strcat(msgClient,idUtilisateur);
+    if(f==0)
+        strcat(msgClient,idUtilisateur);//pas besoin de copier le id utilisateur si f==1
     if(donneeUtilisateur(idUtilisateur,msgClient,"information")<0)
     {
         return -1;//erreur fichier
     }
-    if(nbrVenteEnchereUtilisateur(idUtilisateur,msgClient)<0)
+    if(f==0)
     {
-        return -1;//erreur fichier
+        if(nbrVenteEnchereUtilisateur(idUtilisateur,msgClient)<0)
+        {
+            return -1;//erreur fichier
+        }
+    }
+    if(f==1){
+        strcat(msgClient,"\n");
     }
     printf("informations: %s",msgClient);
     if(EmissionBinaire(msgClient,strlen(msgClient))<=0)
@@ -459,7 +473,7 @@ void recupererInfoUti(char *msg,char *c,char separateur,FILE *file)
     char tmp[101];//plus grande chaine dans le fichier utilisateur
 
     *c=fgetc(file);
-    while(*c!=separateur && *c!=EOF)
+    while(*c!=separateur && *c!=EOF && i<100)
     {
         if(*c!='\n')
         {

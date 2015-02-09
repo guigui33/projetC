@@ -105,7 +105,7 @@ int main()
                 }
                 else if(!strncmp(typeRequete,"infoCpt",7))
                 {
-                    retour=informationUtilisateur(donnee,strlen(donnee));
+                    retour=informationUtilisateur(donnee,strlen(donnee),0);
                     if(retour==1)
                     {
                         sprintf(messageRetour,"%s","infoCptEnvoyee");
@@ -115,10 +115,17 @@ int main()
                         sprintf(messageRetour,"%s","erreurEnvoieInfo");
                     }
                 }
-                else if(!strncmp(typeRequete,"finEnchere",10))//a faire
+                else if(!strncmp(typeRequete,"finVentes",9))
                 {
                     retour=informationFinEnchere(donnee,strlen(donnee));
-
+                     if(retour==1)
+                    {
+                        sprintf(messageRetour,"%s","EOF"); //fin de fichier
+                    }
+                    else if(retour==0)
+                    {
+                        sprintf(messageRetour,"%s","erreurConsulter");
+                    }
                 }
                 else
                 {

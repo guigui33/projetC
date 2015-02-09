@@ -95,4 +95,15 @@ void afficherUtilisateur(char *chaine,int taille);
 \return 1 si date ok, 0 sinon
 */
 int dateNaissance(char *date);
+
+
+/**
+\fn void afficherMesVentesTerminée(FILE *file,int choix,int *finFichier)
+\brief affiche les informations à l'ecran sur un objet du catalogue, retourne l'identifiant objet, retourne un indicateur de EOF
+\param[in] file un pointeur sur un fichier "tmp.txt"
+\param[in] choix le choix de l'utilisateur, 1 l'utilisateur choisit de voir l'objet precedent, 2 voir le suivant, 0 le meme objet
+\param[out] finFichier pointeur sur un entier, permet de retourner si la fin du fichier a été atteinte
+            1 si fin de fichier, -1 si fichier vide, 0 sinon
+*/
+void afficherMesVentesTerminee(FILE *file,int choix,int *finFichier);
 #endif // SECONDAIRE_H_INCLUDED

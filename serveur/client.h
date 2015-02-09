@@ -74,9 +74,10 @@ int donneeUtilisateur(char *idPro,char *msgClient,char *fonction);
 \brief envoie les informations concernant l'utilisateur
 \param[in] message tableau de char contenant les informations de l'utilisateur
 \param[in] taille la taille du message
+\param[in] f determine le type d'information à envoyer
 \return -1 si probleme fichier, 0 si probleme message, 1 sinon
 */
-int informationUtilisateur(char *message,int tailleMsg);
+int informationUtilisateur(char *message,int tailleMsg,int f);
 
 /**
 \fn void recupererInfoUti(char *msg,char *c,char separateur,FILE *file)
