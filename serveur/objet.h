@@ -113,16 +113,17 @@ int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enc
 int testPrix(float prix,FILE *enchere);
 
 /**
-\fn int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere)
+\fn int enregistrementPrix(char *idUti,char *idObjet,char *dateFin,float prix,FILE *enchere)
 \brief copie le fichier enchere en ajoutant le nouveau prix dans le fichier fichier temporaire "fichiers/enchereTmp.txt",
         toutes les informations ont été vérifiées
 \param[in] idUti identifiant de l'utilisateur
 \param[in] idObjet identifiant de l'objet
+\param[in] dateFin la date de fin de l'enchere
 \param[in] prix le prix proposé par l'utilisateur
 \param[in] enchere pointeur sur le fichier enchere.txt
 \return -1 en cas d'erreur fichier, 1 sinon
 */
-int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere);
+int enregistrementPrix(char *idUti,char *idObjet,char *dateFin,float prix,FILE *enchere);
 
 /**
 \fn int acheterObjet(char *msg,int tailleMsg)
@@ -134,12 +135,14 @@ int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere);
 int acheterObjet(char *msg,int tailleMsg);
 
 /**
-\fn int testDateEnchere(FILE *enchere)
+\fn int testDateEnchere(FILE *enchere,char *dateFin)
 \brief test s'il toujours possible d'encherir au moment de l'envoi du message par le client.
 \param[in] enchere pointeur sur un fichier enchere.txt, le curseur est au niveau de la date de fin de l'objet
-\return 0 si l'enchere est finie, 1 sinon
+\param[out] dateFin la date en chaine de caractere, lue dans le fichier enchere.txt
+            on ajoute 15 mn à la date si le temps restant est <15mn et >0.
+\return 0 si l'enchere est finie, 1 si la date est conforme, 2 si la date est conforme mais on doit modifier le fichier objet
 */
-int testDateEnchere(FILE *enchere);
+int testDateEnchere(FILE *enchere,char *dateFin);
 
 
 /**
@@ -198,4 +201,12 @@ void etatEnchere();
 */
 int informationFinEnchere(char *message,int taille);
 
+/**
+\fn int modifierFichierObjet(char *idObjet,char *dateFin)
+\brief modifie la date de fin d'enchere dans le fichier objet.txt
+\param[in] idObjet l'identifiant de l'objet à chercher dans le objet.txt
+\param[in] dateFin la nouvelle date de fin à inclure dans le fichier
+\return -1 si le erreur fichier, 1 si ok
+*/
+int modifierFichierObjet(char *idObjet,char *dateFin);
 #endif // OBJET_H_INCLUDED

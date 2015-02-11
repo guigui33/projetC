@@ -212,8 +212,6 @@ int creationCompte(char *message,int longMsg,char *id)
         return 0;
     }
 
-    //retour=testRenseignementCreation(message,strlen(message));
-
     supprCaractere(message);//suppr le \n
 
     fprintf(user,"$%s#%s#0#0",id,message);
@@ -338,7 +336,6 @@ int incrementerNbrObjet(char *idAcheteur,char *idVendeur)
 
     fclose(user);
     fclose(newUser);
-    //remove("fichiers/user.txt");
     rename(FichierNewUser,FichierUser);
     return 1;
 }

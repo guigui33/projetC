@@ -8,6 +8,7 @@
 #include <time.h>
 
 #define FichierObjetEnVente "/home/guigui/Documents/L3/Projet/serveur/fichiers/objets_en_vente.txt"
+#define FichierObjetEnVenteTmp "/home/guigui/Documents/L3/Projet/serveur/fichiers/objets_en_venteTmp.txt"
 #define FichierEnchere "/home/guigui/Documents/L3/Projet/serveur/fichiers/enchere.txt"
 #define FichierEnchereTmp "/home/guigui/Documents/L3/Projet/serveur/fichiers/enchereTmp.txt"
 #define FichierFinEnchere "/home/guigui/Documents/L3/Projet/serveur/fichiers/finEnchere.txt"
@@ -360,15 +361,16 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
     c=fgetc(fichier);
     while(c!=EOF && retour==1)
     {
-        char idUtiTmp[6];
-        char idObjet[6];
+        char idUtiPro[6];//identifiant proprietaire
+        char idUtiEnchere[6];//identifiant utilisateur enchere
+        char idObjet[6];//identifiant objet
         int trouve=0;//bool de sortie de boucle
-        fgets(idUtiTmp,6,fichier);
+        fgets(idUtiPro,6,fichier);
         c=fgetc(fichier);
         fgets(idObjet,6,fichier);//identifiant de l'objet
-        if(typeUtilisateur==1 && !strcmp(idUtiTmp,idUtili))//on cherche les objets du vendeur
+        if(typeUtilisateur==1 && !strcmp(idUtiPro,idUtili))//on cherche les objets du vendeur
         {
-            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
+            retour=donneeObjet(idUtiPro,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
         }
         else if (typeUtilisateur==2)//on cherche les objets où il a proposé une enchere
         {
@@ -377,21 +379,25 @@ int rechercherObjet(char *idUtili,char *nomRch,char *categorieRch,char *descript
             while(c!=EOF && c!='$' && !trouve)
             {
                 c=fgetc(fichier);
-                while(c!=EOF && c!='#')
+                while(c!=EOF && c!='#' && c!='$')
                 {
                     c=fgetc(fichier);
                 }
-                fgets(idUtiTmp,6,fichier);//l'identifiant
-                if(!strcmp(idUtiTmp,idUtili))
+                if(c!='$' && c!=EOF)
                 {
-                    retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
+                    fgets(idUtiEnchere,6,fichier);//l'identifiant
+                    if(!strcmp(idUtiEnchere,idUtili))
+                    {
+                        trouve=1;//on trouve l'identifiant de l'utilisateur
+                        retour=donneeObjet(idUtiPro,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
+                    }
+                    c=fgetc(fichier);
                 }
-                c=fgetc(fichier);
             }
         }
         else if(typeUtilisateur==0)
         {
-            retour=donneeObjet(idUtiTmp,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
+            retour=donneeObjet(idUtiPro,idObjet,idUtili,typeUtilisateur,nomRch,categorieRch,descriptionRch,0);
         }
         while(c!=EOF && c!='$' && retour==1)
         {
@@ -520,20 +526,19 @@ int extraireIdObjet(char **msg,int tailleMsg,char *idObjet,char *idUti,FILE *enc
 }
 
 /*recuperer date systeme, on compare avec la date de fin de l'enchere */
-/*ajouter les 15 minustes si delai<15mn*60s*/
-int testDateEnchere(FILE *enchere)
+/*les 15 minustes si delai<15mn*60s*/
+int testDateEnchere(FILE *enchere,char *dateFin)
 {
-    char date[13];
-    struct tm finEnchere;//pointeur sur une structure de type tm, pour contenir la date de fin de l' enchere
+    struct tm finEnchere;//pointeur sur une structure de type tm, pour contenir la dateFin de fin de l' enchere
     time_t secondes; //recupere la date systeme en secondes.
     struct tm instant;//struct pour la date actuel
-
+    double sdes=0;//secondes
     fgetc(enchere);//on passe le #
-    fgets(date,13,enchere); //on recupere la date de fin de l'objet sur 12 caracteres
+    fgets(dateFin,13,enchere); //on recupere la date de fin de l'objet sur 12 caracteres
 
     time(&secondes);//date systeme
     /*decomposition de la date de fin enchere dans la strcuture*/
-    sscanf(date,"%2d%2d%2d%2d%4d",&(finEnchere.tm_hour),&(finEnchere.tm_min),&(finEnchere.tm_mday),&(finEnchere.tm_mon),&(finEnchere.tm_year));
+    sscanf(dateFin,"%2d%2d%2d%2d%4d",&(finEnchere.tm_hour),&(finEnchere.tm_min),&(finEnchere.tm_mday),&(finEnchere.tm_mon),&(finEnchere.tm_year));
     finEnchere.tm_mon  -=1 ;   // commence à janvier=0 pour les mois
     finEnchere.tm_year -= 1900;  //annee attention(annee-1900)
     finEnchere.tm_sec  = 0;   /* 0 seconde */
@@ -541,8 +546,16 @@ int testDateEnchere(FILE *enchere)
     mktime(&finEnchere);
 
     instant=*localtime(&secondes);//initialise la struture instant qui est la date systeme actuelle
-
-    if(difftime(mktime(&finEnchere),mktime(&instant))>0)
+    sdes=difftime(mktime(&finEnchere),mktime(&instant));
+    if(sdes<(15*60) && sdes>0)
+    {
+        finEnchere.tm_min+=15;//on ajoute 15mn
+        finEnchere.tm_isdst=-1;//empeche heure d'été et hiver
+        mktime(&finEnchere);
+        strftime(dateFin,13, "%H%M%d%m%Y",&finEnchere);//ecrit dans une chaine au format desiré
+        return 2;//signal il faut modifié le fichier objet
+    }
+    if(sdes>0)//le temps est > à 15mn
     {
         return 1; //la date est ok
     }
@@ -574,18 +587,18 @@ int testPrix(float prix,FILE *enchere)
             return 0; //le prix n'est pas superieur au prix actuel
         }
     }
+
     return -1;//on retourne une erreur
 }
 
-/*refaire date*/
-int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere)
+int enregistrementPrix(char *idUti,char *idObjet,char *dateFin,float prix,FILE *enchere)
 {
     FILE *enchereTmp=NULL;
     char idUtiTmp[6];
     char idObjtTmp[6];
     char c;
 
-    enchereTmp=fopen(FichierEnchereTmp,"wb");
+    enchereTmp=fopen(FichierEnchereTmp,"wb");//on ouvre un fichier tmp
     if(enchereTmp==NULL)
     {
         return -1; //probleme d'ouverture fichier
@@ -607,14 +620,9 @@ int enregistrementPrix(char *idUti,char *idObjet,float prix,FILE *enchere)
             if(!strcmp(idObjtTmp,idObjet))
             {
                 fprintf(enchereTmp,"$%s#%s#",idUtiTmp,idObjtTmp);//on ecrit l'id utilisateur et le id objet
+                fprintf(enchereTmp,"%s#%.2f#%s",dateFin,prix,idUti);
+                fseek(enchere,13,SEEK_CUR);
                 c=fgetc(enchere);//on passe le #
-                c=fgetc(enchere);//on lit le caractere suivant
-                while(c!=EOF && c!='#')
-                {
-                    fprintf(enchereTmp,"%c",c);
-                    c=fgetc(enchere);
-                }
-                fprintf(enchereTmp,"#%.2f#%s",prix,idUti);
             }
             else
             {
@@ -633,6 +641,7 @@ int acheterObjet(char *msg,int tailleMsg)
     int retour=0;
     char idUti[6];
     char idObjet[6];
+    char dateFin[13];//date de fin de l'enchere
     float prix=0;
     FILE *enchere=NULL;
 
@@ -664,12 +673,19 @@ int acheterObjet(char *msg,int tailleMsg)
         return 0;
     }
 
-    retour=testDateEnchere(enchere);
+    retour=testDateEnchere(enchere,dateFin);
     if(retour==0)
     {
         printf("le message n'est pas conforme delai enchere depassé.\n");
-        return 0; //on retourne 0 pour indiquer que le message n'est pas conforme delais enchere depassé.
+        fclose(enchere);
+        return 0; //on retourne 0 pour indiquer que le message n'est pas conforme delai enchere depassé.
     }
+    else if(retour==2)
+    {
+        printf("La date de fin de l'objet a été modifiée.\n");
+        modifierFichierObjet(idObjet,dateFin);//modifie la date de fin d'enchere dans le fichier objet
+    }
+
     sscanf(msg,"%f",&prix);
     retour=testPrix(prix,enchere);
     if(retour==0)
@@ -684,7 +700,7 @@ int acheterObjet(char *msg,int tailleMsg)
     }
 
     rewind(enchere);//on rembobine le fichier
-    retour=enregistrementPrix(idUti,idObjet,prix,enchere);
+    retour=enregistrementPrix(idUti,idObjet,dateFin,prix,enchere);
     if(retour==-1)
     {
         fclose(enchere);
@@ -939,4 +955,58 @@ int informationFinEnchere(char *message,int taille)
 
     fclose(finEnchere);
     return retour;
+}
+
+int modifierFichierObjet(char *idObjet,char *dateFin)
+{
+    FILE *objet=NULL;
+    FILE *objetTmp=NULL;
+    char c;
+    char idObjetTmp[6];
+
+    objet=fopen(FichierObjetEnVente,"rb");
+    objetTmp=fopen(FichierObjetEnVenteTmp,"wb");
+    if(objet==NULL || objetTmp==NULL)
+    {
+        if(objet) fclose(objet);
+        if(objetTmp) fclose(objetTmp);
+        return -1;//erreur fichier
+    }
+    c=fgetc(objet);
+    while(c!=EOF)
+    {
+        int compteur=0;//compteur de #
+        fgets(idObjetTmp,6,objet);//on recupere l'id objet du fichier
+        c=fgetc(objet);
+        fprintf(objetTmp,"$%s",idObjetTmp);
+        while(compteur!=4)
+        {
+            if(c!='\n')
+            {
+                fputc(c,objetTmp);//on ecrit les informations
+            }
+            if(c=='#')
+                compteur++;//on compte les #
+            c=fgetc(objet);
+        }
+        if(!strcmp(idObjet,idObjetTmp))
+        {
+            fprintf(objetTmp,"%s#",dateFin);
+            fseek(objet,12,SEEK_CUR);
+            c=fgetc(objet);
+        }
+        while(c!=EOF && c!='$')
+        {
+            if(c!='\n')
+            {
+                fputc(c,objetTmp);//on ecrit les informations
+            }
+            c=fgetc(objet);
+        }
+    }
+
+    fclose(objet);
+    fclose(objetTmp);
+    rename(FichierObjetEnVenteTmp,FichierObjetEnVente);
+    return 1;
 }
