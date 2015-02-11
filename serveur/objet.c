@@ -837,14 +837,14 @@ void etatEnchere()
         return;
     }
 
-    fgetc(enchere);
+    c=fgetc(enchere);
     while(c!=EOF)
     {
-        fgets(idPro,6,enchere);
-        fgetc(enchere);
-        fgets(idObjet,6,enchere);
-        fgetc(enchere);
-        fgets(dateEnchere,13,enchere);
+        fgets(idPro,6,enchere);//on recupere id vendeur
+        c=fgetc(enchere);//#
+        fgets(idObjet,6,enchere);//on recupère id objet
+        c=fgetc(enchere);
+        fgets(dateEnchere,13,enchere);//on recupere date fin enchere
         if(testDateMiseEnVente(dateEnchere,13,dateDebut,13))//si date positive on ecrit dans fichier enchereTmp
         {
             fprintf(enchereTmp,"$%s#%s#%s",idPro,idObjet,dateEnchere);
@@ -859,11 +859,11 @@ void etatEnchere()
         {
             float prix=0;
             char idAcheteur[6];//identifiant de l'acheteur
-            c=fgetc(finEnchere);
-            fscanf(finEnchere,"%f",&prix);
+            c=fgetc(enchere);
+            fscanf(enchere,"%f",&prix);
             fprintf(finEnchere,"$%s#%s#%s#%5.2f",idPro,idObjet,dateEnchere,prix);
             c=fgetc(enchere);
-            if(c!=EOF && c!='$')//si # cela veut dir acheteur
+            if(c!=EOF && c!='$')//si # cela veut dire un acheteur
             {
                 fgets(idAcheteur,6,finEnchere);//on recupère id
                 incrementerNbrObjet(idAcheteur,idPro);//on increment le nbr d'achat vendeur acheteur.
